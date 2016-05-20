@@ -3,6 +3,7 @@ var ObserveInfo = require('can-observe-info');
 var dev = require('can-util/js/dev/dev');
 var getGlobal = require('can-util/js/global/global');
 var domMutate = require('can-util/dom/mutate/mutate');
+var namespace = require('can-util/namespace');
 
 var attr = function (attributeName, attrHandler) {
 	if(attrHandler) {
@@ -100,4 +101,6 @@ var callbacks = {
 		}
 	}
 };
-module.exports = callbacks;
+
+namespace.view = namespace.view || {};
+module.exports = namespace.view.callback = callbacks;

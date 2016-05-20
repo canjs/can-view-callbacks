@@ -3,9 +3,9 @@
   "version": "3.0.0-pre.1",
   "description": "Registered callbacks for behaviors",
   "homepage": "http://canjs.com",
-    "repository": {
+  "repository": {
     "type": "git",
-    "url": "git://github.com/canjs/can-view-callback.git"
+    "url": "git://github.com/canjs/can-view-callbacks.git"
   },
   "author": {
     "name": "Bitovi",
@@ -27,7 +27,7 @@
     "document": "documentjs",
     "develop": "done-serve --static --develop --port 8080"
   },
-  "main": "dist/cjs/can-view-callbacks",
+  "main": "can-view-callbacks",
   "browser": {
     "transform": [
       "cssify"
@@ -39,27 +39,18 @@
     ]
   },
   "keywords": [
-    "Can",
-    "JS",
-    "Done",
-    "JS"
+    "canjs",
+    "canjs-plugin",
+    "donejs"
   ],
   "system": {
-    "main": "can-view-callbacks",
     "configDependencies": [
       "live-reload"
-    ],
-    "npmIgnore": [
-      "documentjs",
-      "testee",
-      "generator-donejs",
-      "donejs-cli",
-      "steal-tools"
     ],
     "npmAlgorithm": "flat"
   },
   "dependencies": {
-    "can-util": "^3.0.0-pre.1",
+    "can-util": "^3.0.0-pre.21",
     "can-observe-info": "^3.0.0-pre.2"
   },
   "devDependencies": {
