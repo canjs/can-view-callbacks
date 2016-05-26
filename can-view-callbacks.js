@@ -103,4 +103,4 @@ var callbacks = {
 };
 
 namespace.view = namespace.view || {};
-module.exports = namespace.view.callback = callbacks;
+module.exports = namespace.view.callbacks = callbacks;
