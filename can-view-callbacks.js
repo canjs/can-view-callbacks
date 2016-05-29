@@ -41,6 +41,9 @@ var tag = function (tagName, tagHandler) {
 		if (typeof tags[tagName.toLowerCase()] !== 'undefined') {
 			dev.warn("Custom tag: " + tagName.toLowerCase() + " is already defined");
 		}
+		if (!automaticCustomElementCharacters.test(tagName) && tagName !== "content") {
+			dev.warn("Custom tag: " + tagName.toLowerCase() + " hyphen missed");
+		}
 		//!steal-remove-end
 		// if we have html5shive ... re-generate
 		if (getGlobal().html5) {
