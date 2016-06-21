@@ -1,4 +1,4 @@
-var ObserveInfo = require('can-observe-info');
+var Observation = require('can-observation');
 
 var dev = require('can-util/js/dev/dev');
 var getGlobal = require('can-util/js/global/global');
@@ -80,7 +80,7 @@ var callbacks = {
 			res;
 
 		if(tagCallback) {
-			res = ObserveInfo.notObserve(tagCallback)(el, tagData);
+			res = Observation.ignore(tagCallback)(el, tagData);
 		} else {
 			res = scope;
 		}
