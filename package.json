@@ -51,7 +51,7 @@
   },
   "dependencies": {
     "can-util": "^3.0.0-pre.21",
-    "can-observe-info": "^3.0.0-pre.2"
+    "can-observation": "^3.0.0-pre.0"
   },
   "devDependencies": {
     "bit-docs": "0.0.7",
