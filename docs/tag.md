@@ -35,12 +35,12 @@ Check out this video where we talk about different possiblities to use callbacks
 
 
 `callbacks.tag` is a low-level way to add custom behavior to custom elements. Often, you
-want to do this with [can.Component]. However, `can.view.tag` is
-useful for when [can.Component] might be considered overkill.  For example, the
+want to do this with [can-component]. However, [can-view-callbacks.tag callbacks.tag] is
+useful for when [can-component] might be considered overkill.  For example, the
 following creates a [jQueryUI DatePicker](http://api.jqueryui.com/datepicker/) everytime a
 `<jqui-datepicker>` element is found:
 
-    can.view.tag("jqui-datepicker", function(el, tagData){
+    callbacks.tag("jqui-datepicker", function(el, tagData){
       $(el).datepicker()
     })
 
@@ -55,32 +55,32 @@ template within the custom tag.
 `tagData.scope` can be used to read data from the template.  For example, if I wanted
 the value of `"format"` within the current template, it could be read like:
 
-    can.view.tag("jqui-datepicker", function(el, tagData){
+    callbacks.tag("jqui-datepicker", function(el, tagData){
       $(el).datepicker({format: tagData.scope.attr("format")})
     })
 
-    var template = can.mustache("<jqui-datepicker></jqui-datepicker>")
+    var template = mustache("<jqui-datepicker></jqui-datepicker>")
     template({format: "mm/dd/yy"})
     
 `tagData.options` contains the helpers and partials provided 
 to the template.  A helper function might need to be called to get the current value of format like:
 
-    can.view.tag("jqui-datepicker", function(el, tagData){
+    callbacks.tag("jqui-datepicker", function(el, tagData){
       $(el).datepicker({format: tagData.options.attr("helpers.format")()})
     })
 
-    var template = can.mustache("<jqui-datepicker></jqui-datepicker>")
+    var template = mustache("<jqui-datepicker></jqui-datepicker>")
     template({},{format: function(){
       return "mm/dd/yy"
     }})
 
 ## Responding to changing data
 
-Often, data passed to a template is observable.  If you use `can.view.tag`, you must
+Often, data passed to a template is observable.  If you use [can-view-callbacks.tag], you must
 listen and respond to chagnes yourself.  Consider if format is property on a
 `settings` [can.Map] like:
 
-    var settings = new can.Map({
+    var settings = new Map({
       format: "mm/dd/yy"
     })
 
@@ -89,7 +89,7 @@ is to use [can.view.Scope Scope's compute] method which returns a get-set
 compute that is tied to a key value:
 
 
-    can.view.tag("jqui-datepicker", function(el, tagData){
+    callbacks.tag("jqui-datepicker", function(el, tagData){
     
       var formatCompute = tagData.scope.compute("format"),
           changeHandler = function(ev, newVal){
@@ -104,7 +104,7 @@ compute that is tied to a key value:
       
     })
 
-    var template = can.mustache("<jqui-datepicker/>")
+    var template = mustache("<jqui-datepicker/>")
     template(settings)
 
 If you listen on something outside the tag, it's a good practice to stop listening
@@ -119,7 +119,7 @@ when the element is [can.events.removed removed] from the page:
 
 If content is found within a custom tag like:
 
-    var template = can.mustache(
+    var template = mustache(
       "<my-form>\
          <input value="{{first}}"/>\
          <input value="{{last}}"/>\
@@ -129,7 +129,7 @@ A seperate template function is compiled and passed
 as `tagData.subtemplate`.  That subtemplate can
 be rendered with custom data and options. For example:
 
-    can.view.tag("my-form", function(el, tagData){
+    callbacks.tag("my-form", function(el, tagData){
        var frag = tagData.subtemplate({
          first: "Justin"
        }, tagData.options)
@@ -146,7 +146,7 @@ In this case, the sub-template will not get a value for `last`.  To
 include the original data in the subtemplate's scope, [can.view.Scope::add add] to
 the old scope like:
 
-    can.view.tag("my-form", function(el, tagData){
+    callbacks.tag("my-form", function(el, tagData){
        var frag = tagData.subtemplate(
          tagData.scope.add({ first: "Justin" }), 
          tagData.options)
