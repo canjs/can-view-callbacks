@@ -1,13 +1,17 @@
 @function can-view-callbacks.attr attr
+@parent can-view-callbacks/methods
 
 Register custom behavior for an attribute.
 
 @signature `callbacks.attr(attributeName, attrHandler(el, attrData))`
 
-```js
-var callbacks = require("can-view-callbacks");
+Registers the `attrHandler` callback when `attributeName` is found
+in a template.
 
-callbacks.attr("show-when", function(el, attrData){
+```js
+var canViewCallbacks = require("can-view-callbacks");
+
+canViewCallbacks.attr("show-when", function(el, attrData){
 	var prop = el.getAttribute("show-when");
 	var compute = attrData.compute(prop);
 
@@ -20,41 +24,37 @@ callbacks.attr("show-when", function(el, attrData){
 		}
 	};
 
-	compute.bind("change", showOrHide);
+	compute.on("change", showOrHide);
 	showOrHide();
 
-	el.addEventListener("removed", function onremove(){
-		compute.unbind("change", showOrHide);
-		el.removeEventListener("removed", onremove);
+	domEvents.addEventListener.call( el, "removed", function onremove(){
+		compute.off("change", showOrHide);
+		domEvents.removeEventListener.call("removed", onremove);
 	});
 });
 ```
 
-@release 2.1
 
-Registers the `attrHandler` callback when `attributeName` is found 
-in a template.
 
 @param {String|RegExp} attributeName A lower-case attribute name or regular expression
 that matches attribute names. Examples: `"my-fill"` or `/my-\w/`.  
 
-@param {function(HTMLElement,can.view.attrData)} attrHandler(el, attrData) 
-
+@param {function(HTMLElement,can-view-callbacks.attrData)} attrHandler(el, attrData)
 A function that adds custom behavior to `el`.  
 
 @body
 
 ## Use
 
-`can.view.attr` is used to add custom behavior to elements that contain a 
-specified html attribute. Typically it is used to mixin behavior (whereas 
-[can.view.tag] is used to define behavior).
+`canViewCallbacks.attr` is used to add custom behavior to elements that contain a
+specified html attribute. Typically it is used to mixin behavior (whereas
+[can-view-callbacks.tag] is used to define behavior).
 
-The following example adds a jQueryUI tooltip to any element that has 
+The following example adds a jQueryUI tooltip to any element that has
 a `tooltip` attribute like `<div tooltip="Click to edit">Name</div>`.
 
 
-@demo can/view/doc/tooltip.html
+@demo demos/can-view-callbacks/tooltip.html
 
 ## Listening to attribute changes
 
@@ -69,7 +69,7 @@ might want to dynamically update the tooltip like:
 Where `deleteTooltip` changes depending on how many users are selected:
 
     deleteTooltip: function(){
-      var selectedCount = selected.attr("length");
+      var selectedCount = selected.length;
       if(selectedCount) {
         return "Delete "+selectedCount+" users";
       } else {
@@ -78,40 +78,41 @@ Where `deleteTooltip` changes depending on how many users are selected:
     }
 
 
-The [can.events.attributes attributes] event can be used to listen to when
+The [can-util/dom/events/attributes/attributes attributes] event can be used to listen to when
 the toolip attribute changes its value like:
 
+```js
+canViewCallbacks.attr("tooltip", function( el, attrData ) {
+	// A helper that updates or sets up the tooltip
+	var updateTooltip = function(){
+		$(el).tooltip({
+			content: el.getAttribute("tooltip"),
+			items: "[tooltip]"
+		})
+	}
+	// When the tooltip attribute changes, update the tooltip
+	domEvents.addEventListener.call(el, "attributes", function(ev){
+		if(ev.attributeName === "tooltip") {
+			updateTooltip();
+		}
+	});
+	// Setup the tooltip
+	updateTooltip();
 
-    can.view.attr("tooltip", function( el, attrData ) {
-    
-      var updateTooltip = function(){
-        $(el).tooltip({
-          content: el.getAttribute("tooltip"), 
-          items: "[tooltip]"
-        });
-      };
-      
-      $(el).bind("attributes", function(ev){
-        if(ev.attributeName === "tooltip") {
-          updateTooltip();
-        }
-      });
-      
-      updateTooltip();
-			
-    })
+});
+```
 
 To see this behavior in the following demo, hover the mouse over the "Delete" button.  Then
 select some users and hover over the "Delete" button again:
 
-@demo can/view/doc/dynamic_tooltip.html
+@demo demos/can-view-callbacks/dynamic_tooltip.html
 
 
 ## Reading values from the scope.
 
 It's common that attribute mixins need complex, observable data to
 perform rich behavior. The attribute mixin is able to read
-data from the element's [can.view.Scope scope]. For example, 
+data from the element's [can.view.Scope scope]. For example,
 __toggle__ and __fade-in-when__ will need the value of `showing` in:
 
     <button toggle="showing">
@@ -119,16 +120,16 @@ __toggle__ and __fade-in-when__ will need the value of `showing` in:
     <div fade-in-when="showing">
       Here is more info!
     </div>
-    
-These values can be read from [can.view.attrData attrData]'s scope like:
+
+These values can be read from [can-view-callbacks.attrData]'s scope like:
 
     attrData.scope.attr("showing")
 
-But often, you want to update scope value or listen when the scope value 
+But often, you want to update scope value or listen when the scope value
 changes. For example, the __toggle__ mixin might want to update `showing`
-and the __fade-in-when__ mixin needs to know when 
-the `showing` changes.  Both of these can be achived by 
-using [can.view.Scope::compute compute] to get a get/set compute that is
+and the __fade-in-when__ mixin needs to know when
+the `showing` changes.  Both of these can be achived by
+using [can-view-scope::compute compute] to get a get/set compute that is
 tied to the value in the scope:
 
     var showing = attrData.scope.compute("showing")
@@ -136,20 +137,20 @@ tied to the value in the scope:
 This value can be written to by `toggle`:
 
 
-    can.view.attr("toggle", function(el, attrData){
-    
+    canViewCallbacks.attr("toggle", function(el, attrData){
+
       var attrValue = el.getAttribute("toggle")
           toggleCompute = attrData.scope.compute(attrValue);
-	
+
       $(el).click(function(){
         toggleCompute(! toggleCompute() )
       })
-	
+
     })
 
 Or listened to by `fade-in-when`:
 
-    can.view.attr("fade-in-when", function( el, attrData ) {
+    canViewCallbacks.attr("fade-in-when", function( el, attrData ) {
       var attrValue = el.getAttribute("fade-in-when");
           fadeInCompute = attrData.scope.compute(attrValue),
           handler = function(ev, newVal, oldVal){
@@ -160,28 +161,28 @@ Or listened to by `fade-in-when`:
             }
           }
 
-      fadeInCompute.bind("change",handler);
+      fadeInCompute.on("change",handler);
 
       ...
-    })
-
-When you listen to something other than the attribute's element, remember to
-unbind the event handler when the element is [can.events.removed removed] from the page:
-
-    $(el).bind("removed", function(){
-      fadeInCompute.unbind(handler);
     });
 
-@demo can/view/doc/fade_in_when.html
+When you listen to something other than the attribute's element, remember to
+unbind the event handler when the element is [can-util/dom/events/removed/removed removed] from the page:
+
+```js
+domEvents.addEventListener.call(el,"removed", function(){
+	fadeInCompute.off(handler);
+});
+```
+
+@demo demos/can-view-callbacks/fade_in_when.html
 
 ## When to call
 
-`can.view.attr` must be called before a template is processed. When [using `can.view` to create a renderer function](http://canjs.com/docs/can.view.html#sig_can_view_idOrUrl_), `can.view.attr` must be called before the template is loaded, not simply before it is rendered.
+`canViewCallbacks.attr` must be called before a template is processed. When [using `can.view` to create a renderer function](http://canjs.com/docs/can.view.html#sig_can_view_idOrUrl_), `canViewCallbacks.attr` must be called before the template is loaded, not simply before it is rendered.
 
-		//Call can.view.attr first
-		can.view.attr('tooltip', tooltipFunction);
+		//Call canViewCallbacks.attr first
+		canViewCallbacks.attr('tooltip', tooltipFunction);
 		//Preload a template for rendering
-		var renderer = can.view('app-template');
-		//No calls to can.view.attr after this will be used by `renderer`
-
-
+		var renderer = stache("<div tooltip='Hi There'>...</div>");
+		//No calls to canViewCallbacks.attr after this will be used by `renderer`

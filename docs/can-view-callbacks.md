@@ -1,5 +1,9 @@
 @module {{}} can-view-callbacks can-view-callbacks
 @parent can-infrastructure
+@group can-view-callbacks/methods methods
+@group can-view-callbacks/types types
+
+
 @description Registered callbacks for behaviors
 
 @body
