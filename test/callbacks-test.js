@@ -27,3 +27,14 @@ QUnit.test("Show warning if in tag name a hyphen is missed", function () {
 	};
 	callbacks.tag(tagName, function(){});
 });
+
+QUnit.test("includeSubtemplate third attribute adds attribute to the handler", function(){
+	var attrCallback = function(el, attrData){
+		
+	};
+
+	callbacks.attr("foo-bar", attrCallback, true);
+
+	equal(attrCallback.includeSubtemplate, true, "marked as needing the subtemplate");
+
+});

@@ -40,7 +40,29 @@ canViewCallbacks.attr("show-when", function(el, attrData){
 that matches attribute names. Examples: `"my-fill"` or `/my-\w/`.  
 
 @param {function(HTMLElement,can-view-callbacks.attrData)} attrHandler(el, attrData)
-A function that adds custom behavior to `el`.  
+A function that adds custom behavior to `el`.
+
+@signature `callbacks.attr(attributeName, attrHandler(el, attrData), includeSubtemplate)`
+
+Registers the `attrHandler` callback when `attributeName` is found and makes the handler to receive a subtemplate renderer.
+
+```js
+var canViewCallbacks = require("can-view-callbacks");
+
+var handler = function(el, attrData){
+	// render the subtemplate, if you want
+	var frag = attrData.subtemplate({});
+	el.appendChild(frag);
+};
+
+canViewCallbacks.attr("my-tabs", handler, true);
+```
+
+@param {String} attributeName a lower-case attribute name. No regular expressions are allowed in this signature.
+
+@param {function(HTMLElement, can-view-callbacks.attrData)} attrHandler(el, attrData) A function that adds custom behavior to `el`.
+
+@param {Boolean} [includeSubtemplate=false] A boolean that when true provides a `subtemplate` renderer function as a property on [can-view-callbacks.attrData].
 
 @body
 

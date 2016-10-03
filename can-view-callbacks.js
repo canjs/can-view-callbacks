@@ -5,7 +5,7 @@ var getGlobal = require('can-util/js/global/global');
 var domMutate = require('can-util/dom/mutate/mutate');
 var namespace = require('can-util/namespace');
 
-var attr = function (attributeName, attrHandler) {
+var attr = function (attributeName, attrHandler, includeSubtemplate) {
 	if(attrHandler) {
 		if (typeof attributeName === "string") {
 			attributes[attributeName] = attrHandler;
@@ -14,6 +14,9 @@ var attr = function (attributeName, attrHandler) {
 				match: attributeName,
 				handler: attrHandler
 			});
+		}
+		if(includeSubtemplate) {
+			attrHandler.includeSubtemplate = true;
 		}
 	} else {
 		var cb = attributes[attributeName];
@@ -64,26 +67,46 @@ var tag = function (tagName, tagHandler) {
 };
 var tags = {};
 
+var callCallbackAndRender = function(el, callback, data){
+	// If this was an element like <foo-bar> that doesn't have a component, just render its content
+	var scope = data.scope,
+		res;
+
+	if(callback) {
+		res = Observation.ignore(callback)(el, data);
+	} else {
+		res = scope;
+	}
+
+
+
+	// If the tagCallback gave us something to render with, and there is content within that element
+	// render it!
+	if (res && tagData.subtemplate) {
+
+		if (scope !== res) {
+			scope = scope.add(res);
+		}
+		var result = tagData.subtemplate(scope, tagData.options);
+		var frag = typeof result === "string" ? can.view.frag(result) : result;
+		domMutate.appendChild.call(el, frag);
+	}
+};
+
 var callbacks = {
 	_tags: tags,
 	_attributes: attributes,
 	_regExpAttributes: regExpAttributes,
 	tag: tag,
 	attr: attr,
+	attrHandler: function(el, attrName, attrData){
+		var attrCallback = attr(attrName);
+		callCallbackAndRender(el, attrCallback, attrData);
+	},
 	// handles calling back a tag callback
 	tagHandler: function(el, tagName, tagData){
 		var helperTagCallback = tagData.options.get('tags.' + tagName,{proxyMethods: false}),
 			tagCallback = helperTagCallback || tags[tagName];
-
-		// If this was an element like <foo-bar> that doesn't have a component, just render its content
-		var scope = tagData.scope,
-			res;
-
-		if(tagCallback) {
-			res = Observation.ignore(tagCallback)(el, tagData);
-		} else {
-			res = scope;
-		}
 
 		//!steal-remove-start
 		if (!tagCallback) {
@@ -91,17 +114,7 @@ var callbacks = {
 		}
 		//!steal-remove-end
 
-		// If the tagCallback gave us something to render with, and there is content within that element
-		// render it!
-		if (res && tagData.subtemplate) {
-
-			if (scope !== res) {
-				scope = scope.add(res);
-			}
-			var result = tagData.subtemplate(scope, tagData.options);
-			var frag = typeof result === "string" ? can.view.frag(result) : result;
-			domMutate.appendChild.call(el, frag);
-		}
+		callCallbackAndRender(el, tagCallback, data);
 	}
 };
 
