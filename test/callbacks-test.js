@@ -25,6 +25,11 @@ QUnit.test("Show warning if in tag name a hyphen is missed", function () {
 		equal(text, "Custom tag: " + tagName.toLowerCase() + " hyphen missed");
 		dev.warn = oldlog;
 	};
+
+	// make sure tag doesn't already exist
+	callbacks.tag(tagName, null);
+
+	// add tag
 	callbacks.tag(tagName, function(){});
 });
 
