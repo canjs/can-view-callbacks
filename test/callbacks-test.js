@@ -27,3 +27,15 @@ QUnit.test("Show warning if in tag name a hyphen is missed", function () {
 	};
 	callbacks.tag(tagName, function(){});
 });
+
+QUnit.test("remove a tag by passing null as second argument", function() {
+	var callCount = 0;
+	var tagName = "my-tag";
+	var handler = function() {
+		console.log('this is the handler');
+	};
+	callbacks.tag(tagName, handler);
+
+	equal(callbacks.tag(tagName), handler, 'passing no second argument should get handler');
+	notEqual(callbacks.tag(tagName, null), handler, 'passing null as second argument should remove handler');
+});
