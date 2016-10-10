@@ -45,7 +45,7 @@ var tag = function (tagName, tagHandler) {
 			dev.warn("Custom tag: " + tagName.toLowerCase() + " hyphen missed");
 		}
 		//!steal-remove-end
-		// if we have html5shive ... re-generate
+		// if we have html5shiv ... re-generate
 		if (getGlobal().html5) {
 			getGlobal().html5.elements += " " + tagName;
 			getGlobal().html5.shivDocument();
@@ -53,7 +53,15 @@ var tag = function (tagName, tagHandler) {
 
 		tags[tagName.toLowerCase()] = tagHandler;
 	} else {
-		var cb = tags[tagName.toLowerCase()];
+		var cb;
+
+		// if null is passed as tagHandler, remove tag
+		if (tagHandler === null) {
+			delete tags[tagName.toLowerCase()];
+		} else {
+			cb = tags[tagName.toLowerCase()];
+		}
+
 		if(!cb && automaticCustomElementCharacters.test(tagName)) {
 			// empty callback for things that look like special tags
 			cb = function(){};
