@@ -2,7 +2,7 @@
 @parent can-infrastructure
 @group can-view-callbacks/methods methods
 @group can-view-callbacks/types types
-
+@package ../package.json
 
 @description Registered callbacks for behaviors
 
