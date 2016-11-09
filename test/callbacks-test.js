@@ -17,21 +17,23 @@ QUnit.test("Placed as view.callbacks on the can namespace", function(){
 	equal(callbacks, can.view.callbacks, "Namespace value as can.view.callbacks");
 });
 
-QUnit.test("Show warning if in tag name a hyphen is missed", function () {
-	var tagName = "foobar";
-	var oldlog = dev.warn;
-	dev.warn = function(text) {
-		ok(text, "got warning");
-		equal(text, "Custom tag: " + tagName.toLowerCase() + " hyphen missed");
-		dev.warn = oldlog;
-	};
+if (System.env.indexOf('production') < 0) {
+	QUnit.test("Show warning if in tag name a hyphen is missed", function () {
+		var tagName = "foobar";
+		var oldlog = dev.warn;
+		dev.warn = function(text) {
+			ok(text, "got warning");
+			equal(text, "Custom tag: " + tagName.toLowerCase() + " hyphen missed");
+			dev.warn = oldlog;
+		};
 
-	// make sure tag doesn't already exist
-	callbacks.tag(tagName, null);
+		// make sure tag doesn't already exist
+		callbacks.tag(tagName, null);
 
-	// add tag
-	callbacks.tag(tagName, function(){});
-});
+		// add tag
+		callbacks.tag(tagName, function(){});
+	});
+}
 
 QUnit.test("remove a tag by passing null as second argument", function() {
 	var callCount = 0;
