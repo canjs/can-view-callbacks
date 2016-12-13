@@ -1,7 +1,8 @@
 var QUnit = require('steal-qunit');
 var callbacks = require('can-view-callbacks');
 var dev = require('can-util/js/dev/dev');
-var can = require("can-util/namespace");
+var can = require('can-namespace');
+var clone = require('steal-clone')
 
 QUnit.module('can-view-callbacks');
 
@@ -45,4 +46,24 @@ QUnit.test("remove a tag by passing null as second argument", function() {
 
 	equal(callbacks.tag(tagName), handler, 'passing no second argument should get handler');
 	notEqual(callbacks.tag(tagName, null), handler, 'passing null as second argument should remove handler');
+});
+
+QUnit.test('should throw if can-namespace.view.callbacks is already defined', function() {
+	stop();
+	clone({
+		'can-namespace': {
+			view: {
+				callbacks: {}
+			}
+		}
+	})
+	.import('can-view-callbacks')
+	.then(function() {
+		ok(false, 'should throw');
+		start();
+	})
+	.catch(function(err) {
+		ok(err && err.indexOf('can-view-callbacks') >= 0, 'should throw an error about can-view-callbacks');
+		start();
+	});
 });

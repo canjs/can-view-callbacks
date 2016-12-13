@@ -50,6 +50,7 @@
     "npmAlgorithm": "flat"
   },
   "dependencies": {
+    "can-namespace": "1.0.0",
     "can-observation": "^3.0.1",
     "can-util": "^3.0.1"
   },

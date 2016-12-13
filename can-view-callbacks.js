@@ -3,7 +3,7 @@ var Observation = require('can-observation');
 var dev = require('can-util/js/dev/dev');
 var getGlobal = require('can-util/js/global/global');
 var domMutate = require('can-util/dom/mutate/mutate');
-var namespace = require('can-util/namespace');
+var namespace = require('can-namespace');
 
 var attr = function (attributeName, attrHandler) {
 	if(attrHandler) {
@@ -114,4 +114,9 @@ var callbacks = {
 };
 
 namespace.view = namespace.view || {};
-module.exports = namespace.view.callbacks = callbacks;
+
+if (namespace.view.callbacks) {
+	throw new Error("You can't have two versions of can-view-callbacks, check your dependencies");
+} else {
+	module.exports = namespace.view.callbacks = callbacks;
+}
