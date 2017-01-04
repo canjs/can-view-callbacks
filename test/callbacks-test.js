@@ -52,9 +52,12 @@ QUnit.test('should throw if can-namespace.view.callbacks is already defined', fu
 	stop();
 	clone({
 		'can-namespace': {
-			view: {
-				callbacks: {}
-			}
+			default: {
+				view: {
+					callbacks: {}
+				}
+			},
+			__useDefault: true
 		}
 	})
 	.import('can-view-callbacks')
