@@ -5,8 +5,11 @@ var getGlobal = require('can-util/js/global/global');
 var domMutate = require('can-util/dom/mutate/mutate');
 var namespace = require('can-namespace');
 
-var attr = function (attributeName, attrHandler) {
+var attr = function (attributeName, attrHandler, subtemplate) {
 	if(attrHandler) {
+
+		attrHandler.subtemplate = subtemplate;
+
 		if (typeof attributeName === "string") {
 			attributes[attributeName] = attrHandler;
 		} else {
@@ -78,6 +81,9 @@ var callbacks = {
 	_regExpAttributes: regExpAttributes,
 	tag: tag,
 	attr: attr,
+	attrMetadata: function(attrName){
+		return attr(attrName);
+	},
 	// handles calling back a tag callback
 	tagHandler: function(el, tagName, tagData){
 		var helperTagCallback = tagData.options.get('tags.' + tagName,{proxyMethods: false}),
