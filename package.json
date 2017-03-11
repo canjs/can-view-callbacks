@@ -40,7 +40,7 @@
   },
   "dependencies": {
     "can-namespace": "1.0.0",
-    "can-observation": "^3.0.1",
+    "can-observation": "3.1.0",
     "can-util": "^3.0.1"
   },
   "devDependencies": {
