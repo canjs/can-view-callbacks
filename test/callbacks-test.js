@@ -66,7 +66,8 @@ QUnit.test('should throw if can-namespace.view.callbacks is already defined', fu
 		start();
 	})
 	.catch(function(err) {
-		ok(err && err.message.indexOf('can-view-callbacks') >= 0, 'should throw an error about can-view-callbacks');
+		var errMsg = err && err.message || err;
+		ok(errMsg.indexOf('can-view-callbacks') >= 0, 'should throw an error about can-view-callbacks');
 		start();
 	});
 });
