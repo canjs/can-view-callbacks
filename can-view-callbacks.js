@@ -95,7 +95,7 @@ var callbacks = {
 
 		//!steal-remove-start
 		if (!tagCallback) {
-			dev.warn('can/view/scanner.js: No custom element found for ' + tagName);
+			dev.warn('can-view-callbacks: No custom element found for ' + tagName);
 		}
 		//!steal-remove-end
 
