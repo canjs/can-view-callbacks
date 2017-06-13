@@ -1,5 +1,7 @@
 # can-view-callbacks
 
+[![Greenkeeper badge](https://badges.greenkeeper.io/canjs/can-view-callbacks.svg)](https://greenkeeper.io/)
+
 [![Build Status](https://travis-ci.org/canjs/can-view-callbacks.png?branch=master)](https://travis-ci.org/canjs/can-view-callbacks)
 
 Registered callbacks for behaviors
