@@ -40,7 +40,8 @@ canViewCallbacks.attr("show-when", function(el, attrData){
 that matches attribute names. Examples: `"my-fill"` or `/my-\w/`.  
 
 @param {function(HTMLElement,can-view-callbacks.attrData)} attrHandler(el, attrData)
-A function that adds custom behavior to `el`.  
+A function that adds custom behavior to `el`. Note that `el` might not be in the DOM
+when the callback is called.
 
 @body
 
