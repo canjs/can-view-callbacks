@@ -71,3 +71,39 @@ QUnit.test('should throw if can-namespace.view.callbacks is already defined', fu
 		start();
 	});
 });
+
+
+if (System.env.indexOf('production') < 0) {
+	QUnit.test("should warn if attr callback defined after attr requested (#57)", function () {
+		var attrName = "masonry-wall";
+		var oldlog = dev.warn;
+		dev.warn = function(text) {
+			ok(text, "got warning");
+			equal(text, "can-view-callbacks: " + attrName+ " custom attribute behavior requested before it was defined.  Make sure "+attrName+" is defined before it is needed.");
+			dev.warn = oldlog;
+		};
+
+		// calback attr requested
+		callbacks.attr(attrName);
+
+		// callback attr provided
+		callbacks.attr(attrName, function(){});
+	});
+
+	QUnit.test("should warn if RegExp attr callback defined after attr requested (#57)", function () {
+		var attrName = "masonry-wall";
+		var attrMatch = /masonry[- ]?wall/;
+		var oldlog = dev.warn;
+		dev.warn = function(text) {
+			ok(text, "got warning");
+			equal(text, "can-view-callbacks: " + attrName+ " custom attribute behavior requested before it was defined.  Make sure "+attrMatch.toString()+" is defined before it is needed.");
+			dev.warn = oldlog;
+		};
+
+		// calback attr requested
+		callbacks.attr(attrName);
+
+		// callback attr provided
+		callbacks.attr(attrMatch, function(){});
+	});
+}

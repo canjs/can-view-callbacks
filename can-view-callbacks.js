@@ -5,15 +5,32 @@ var getGlobal = require('can-util/js/global/global');
 var domMutate = require('can-util/dom/mutate/mutate');
 var namespace = require('can-namespace');
 
+//!steal-remove-start
+var requestedAttributes = {};
+//!steal-remove-end
+
 var attr = function (attributeName, attrHandler) {
 	if(attrHandler) {
 		if (typeof attributeName === "string") {
 			attributes[attributeName] = attrHandler;
+			//!steal-remove-start
+			if(requestedAttributes[attributeName]) {
+				dev.warn("can-view-callbacks: " + attributeName+ " custom attribute behavior requested before it was defined.  Make sure "+attributeName+" is defined before it is needed.");
+			}
+			//!steal-remove-end
 		} else {
 			regExpAttributes.push({
 				match: attributeName,
 				handler: attrHandler
 			});
+
+			//!steal-remove-start
+			Object.keys(requestedAttributes).forEach(function(requested){
+				if(attributeName.test(requested)) {
+					dev.warn("can-view-callbacks: " + requested+ " custom attribute behavior requested before it was defined.  Make sure "+attributeName+" is defined before it is needed.");
+				}
+			});
+			//!steal-remove-end
 		}
 	} else {
 		var cb = attributes[attributeName];
@@ -22,12 +39,13 @@ var attr = function (attributeName, attrHandler) {
 			for( var i = 0, len = regExpAttributes.length; i < len; i++) {
 				var attrMatcher = regExpAttributes[i];
 				if(attrMatcher.match.test(attributeName)) {
-					cb = attrMatcher.handler;
-					break;
+					return attrMatcher.handler;
 				}
 			}
 		}
-		return cb;
+		//!steal-remove-start
+		requestedAttributes[attributeName] = true;
+		//!steal-remove-end
 	}
 };
 
