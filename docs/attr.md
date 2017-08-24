@@ -8,6 +8,8 @@ Register custom behavior for an attribute.
 Registers the `attrHandler` callback when `attributeName` is found
 in a template.
 
+Handlers must be registered before templates using them are parsed.
+
 ```js
 var canViewCallbacks = require("can-view-callbacks");
 
@@ -37,7 +39,7 @@ canViewCallbacks.attr("show-when", function(el, attrData){
 
 
 @param {String|RegExp} attributeName A lower-case attribute name or regular expression
-that matches attribute names. Examples: `"my-fill"` or `/my-\w/`.  
+that matches attribute names. Examples: `"my-fill"` or `/my-\w/`.
 
 @param {function(HTMLElement,can-view-callbacks.attrData)} attrHandler(el, attrData)
 A function that adds custom behavior to `el`. Note that `el` might not be in the DOM
