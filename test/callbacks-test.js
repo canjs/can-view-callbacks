@@ -115,3 +115,11 @@ if (System.env.indexOf('production') < 0) {
 		notOk(callbacks.tag('notexist'), "used default noop function")
 	});
 }
+
+QUnit.test("should return callback", function(){
+	var handler = function() {};
+	callbacks.attr('foo', handler);
+	
+	var fooHandler = callbacks.attr('foo');
+	equal(fooHandler, handler, 'registered handler returned');
+});
