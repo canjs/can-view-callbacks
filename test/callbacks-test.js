@@ -106,4 +106,12 @@ if (System.env.indexOf('production') < 0) {
 		// callback attr provided
 		callbacks.attr(attrMatch, function(){});
 	});
+
+	QUnit.test("tag method should return default callback when valid tag but not registered", function () {
+		equal(callbacks.tag('not-exist'), callbacks.defaultCallback, "used default noop function")
+	});
+
+	QUnit.test("tag method should return undefined when invalid tag and not registered", function () {
+		notOk(callbacks.tag('notexist'), "used default noop function")
+	});
 }

@@ -52,6 +52,7 @@ var attr = function (attributeName, attrHandler) {
 var attributes = {},
 	regExpAttributes = [],
 	automaticCustomElementCharacters = /[-\:]/;
+var defaultCallback = function () {};
 
 var tag = function (tagName, tagHandler) {
 	if(tagHandler) {
@@ -82,7 +83,7 @@ var tag = function (tagName, tagHandler) {
 
 		if(!cb && automaticCustomElementCharacters.test(tagName)) {
 			// empty callback for things that look like special tags
-			cb = function(){};
+			cb = defaultCallback;
 		}
 		return cb;
 	}
@@ -94,6 +95,7 @@ var callbacks = {
 	_tags: tags,
 	_attributes: attributes,
 	_regExpAttributes: regExpAttributes,
+	defaultCallback: defaultCallback,
 	tag: tag,
 	attr: attr,
 	// handles calling back a tag callback
