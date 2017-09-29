@@ -46,6 +46,8 @@ var attr = function (attributeName, attrHandler) {
 		//!steal-remove-start
 		requestedAttributes[attributeName] = true;
 		//!steal-remove-end
+		
+		return cb;
 	}
 };
 
