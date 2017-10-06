@@ -2,7 +2,8 @@ var QUnit = require('steal-qunit');
 var callbacks = require('can-view-callbacks');
 var dev = require('can-util/js/dev/dev');
 var can = require('can-namespace');
-var clone = require('steal-clone')
+var clone = require('steal-clone');
+var devUtils = require("can-test-helpers/lib/dev");
 
 QUnit.module('can-view-callbacks');
 
@@ -37,7 +38,6 @@ if (System.env.indexOf('production') < 0) {
 }
 
 QUnit.test("remove a tag by passing null as second argument", function() {
-	var callCount = 0;
 	var tagName = "my-tag";
 	var handler = function() {
 		console.log('this is the handler');
@@ -116,10 +116,35 @@ if (System.env.indexOf('production') < 0) {
 	});
 }
 
-QUnit.test("should return callback", function(){
+QUnit.test("should return callback (#60)", function(){
 	var handler = function() {};
 	callbacks.attr('foo', handler);
 	
 	var fooHandler = callbacks.attr('foo');
 	equal(fooHandler, handler, 'registered handler returned');
 });
+
+if(document.registerElement) {
+	devUtils.devOnlyTest("should warn about missing custom elements (#56)", function(){
+		var customElement = document.createElement('custom-element');
+		var restore = devUtils.willWarn(/no custom element found for/i);
+		testTagHandler(customElement);
+		equal(restore(), 1);
+	});	
+
+	devUtils.devOnlyTest("should not warn about defined custom elements (#56)", function(){
+		document.registerElement('custom-element', {});
+		var customElement = document.createElement('custom-element');
+		var restore = devUtils.willWarn(/no custom element found for/i);
+		testTagHandler(customElement);
+		equal(restore(), 0);
+	});	
+}
+
+function testTagHandler(customElement){
+	callbacks.tagHandler(customElement, customElement.tagName, {
+		options: {
+			get: function noop(){}
+		}
+	});
+}
