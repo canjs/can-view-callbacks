@@ -1,6 +1,6 @@
 {
   "name": "can-view-callbacks",
-  "version": "3.2.2",
+  "version": "4.0.0-pre.0",
   "description": "Registered callbacks for behaviors",
   "homepage": "http://canjs.com",
   "repository": {
@@ -13,9 +13,8 @@
     "url": "http://bitovi.com"
   },
   "scripts": {
-    "preversion": "npm test && npm run build",
-    "version": "git commit -am \"Update dist for release\" && git checkout -b release && git add -f dist/",
-    "postversion": "git push --tags && git checkout master && git branch -D release && git push",
+    "preversion": "npm test",
+    "postpublish": "git push --tags && git push",
     "testee": "testee test/test.html --browsers firefox",
     "test": "npm run detect-cycle && npm run jshint && npm run testee",
     "jshint": "jshint ./*.js --config",
@@ -40,7 +39,7 @@
   },
   "dependencies": {
     "can-namespace": "1.0.0",
-    "can-observation": "^3.3.1",
+    "can-observation-recorder": "^0.1.0",
     "can-util": "^3.9.5"
   },
   "devDependencies": {

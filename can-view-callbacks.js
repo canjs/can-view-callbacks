@@ -1,4 +1,4 @@
-var Observation = require('can-observation');
+var ObservationRecorder = require('can-observation-recorder');
 
 var dev = require('can-util/js/dev/dev');
 var getGlobal = require('can-util/js/global/global');
@@ -46,7 +46,7 @@ var attr = function (attributeName, attrHandler) {
 		//!steal-remove-start
 		requestedAttributes[attributeName] = true;
 		//!steal-remove-end
-		
+
 		return cb;
 	}
 };
@@ -110,7 +110,7 @@ var callbacks = {
 			res;
 
 		if(tagCallback) {
-			res = Observation.ignore(tagCallback)(el, tagData);
+			res = ObservationRecorder.ignore(tagCallback)(el, tagData);
 		} else {
 			res = scope;
 		}
