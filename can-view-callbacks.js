@@ -58,6 +58,8 @@ var defaultCallback = function () {};
 
 var tag = function (tagName, tagHandler) {
 	if(tagHandler) {
+		var GLOBAL = getGlobal();
+
 		//!steal-remove-start
 		if (typeof tags[tagName.toLowerCase()] !== 'undefined') {
 			dev.warn("Custom tag: " + tagName.toLowerCase() + " is already defined");
@@ -67,9 +69,9 @@ var tag = function (tagName, tagHandler) {
 		}
 		//!steal-remove-end
 		// if we have html5shiv ... re-generate
-		if (getGlobal().html5) {
-			getGlobal().html5.elements += " " + tagName;
-			getGlobal().html5.shivDocument();
+		if (GLOBAL.html5) {
+			GLOBAL.html5.elements += " " + tagName;
+			GLOBAL.html5.shivDocument();
 		}
 
 		tags[tagName.toLowerCase()] = tagHandler;
@@ -117,7 +119,12 @@ var callbacks = {
 
 		//!steal-remove-start
 		if (!tagCallback) {
-			dev.warn('can-view-callbacks: No custom element found for ' + tagName);
+			var GLOBAL = getGlobal();
+			var ceConstructor = GLOBAL.document.createElement(tagName).constructor;
+			// If not registered as a custom element, the browser will use default constructors
+			if (ceConstructor === GLOBAL.HTMLElement || ceConstructor === GLOBAL.HTMLUnknownElement) {
+				dev.warn('can-view-callbacks: No custom element found for ' + tagName);	
+			}
 		}
 		//!steal-remove-end
 
