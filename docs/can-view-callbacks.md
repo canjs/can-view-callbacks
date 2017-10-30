@@ -1,5 +1,6 @@
 @module {{}} can-view-callbacks can-view-callbacks
-@parent can-infrastructure
+@parent can-views
+@collection can-infrastructure
 @group can-view-callbacks/methods methods
 @group can-view-callbacks/types types
 @package ../package.json
