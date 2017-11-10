@@ -2,7 +2,7 @@
   "name": "can-view-callbacks",
   "version": "4.0.0-pre.2",
   "description": "Registered callbacks for behaviors",
-  "homepage": "http://canjs.com",
+  "homepage": "https://canjs.com/doc/can-view-callbacks.html",
   "repository": {
     "type": "git",
     "url": "git://github.com/canjs/can-view-callbacks.git"
@@ -43,6 +43,7 @@
     "can-util": "^3.9.5"
   },
   "devDependencies": {
+    "can-test-helpers": "^1.0.1",
     "detect-cyclic-packages": "^1.1.0",
     "done-serve": "^1.2.0",
     "jshint": "^2.9.1",
