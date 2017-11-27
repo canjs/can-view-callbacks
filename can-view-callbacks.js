@@ -104,7 +104,7 @@ var callbacks = {
 	attr: attr,
 	// handles calling back a tag callback
 	tagHandler: function(el, tagName, tagData){
-		var helperTagCallback = tagData.options.get('tags.' + tagName,{proxyMethods: false}),
+		var helperTagCallback = tagData.scope.templateContext.tags.get(tagName),
 			tagCallback = helperTagCallback || tags[tagName];
 
 		// If this was an element like <foo-bar> that doesn't have a component, just render its content

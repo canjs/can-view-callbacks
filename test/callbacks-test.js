@@ -4,6 +4,7 @@ var dev = require('can-util/js/dev/dev');
 var can = require('can-namespace');
 var clone = require('steal-clone');
 var devUtils = require("can-test-helpers/lib/dev");
+var Scope = require("can-view-scope");
 
 QUnit.module('can-view-callbacks');
 
@@ -143,8 +144,26 @@ if(document.registerElement) {
 
 function testTagHandler(customElement){
 	callbacks.tagHandler(customElement, customElement.tagName, {
-		options: {
-			get: function noop(){}
-		}
+		scope: new Scope({})
 	});
 }
+
+QUnit.test("can read tags from templateContext.tags", function() {
+	var globalHandler = function() {
+		QUnit.ok(false, 'global handler should not be called');
+		return 'global data';
+	};
+	callbacks.tag('foo', globalHandler);
+
+	var scope = new Scope({});
+	var localHandler = function() {
+		QUnit.ok(true, 'local handler called');
+		return 'local data';
+	};
+	scope.templateContext.tags.set('foo', localHandler);
+
+	var el = document.createElement('div');
+	var fooHandler = callbacks.tagHandler(el, 'foo', {
+		scope: scope
+	});
+});

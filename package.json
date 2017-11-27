@@ -44,6 +44,7 @@
   },
   "devDependencies": {
     "can-test-helpers": "^1.0.1",
+    "can-view-scope": "^4.0.0-pre.34",
     "detect-cyclic-packages": "^1.1.0",
     "done-serve": "^1.2.0",
     "jshint": "^2.9.1",
