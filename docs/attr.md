@@ -65,11 +65,11 @@ In the previous example, the content of the tooltip was static. However,
 it's likely that the tooltip's value might change. For instance, the template
 might want to dynamically update the tooltip like:
 
-    <button tooltip="{{deleteTooltip}}">
+    <button tooltip="{{deleteTooltip()}}">
       Delete
     </button>
 
-Where `deleteTooltip` changes depending on how many users are selected:
+Where `deleteTooltip()` changes depending on how many users are selected:
 
     deleteTooltip: function(){
       var selectedCount = selected.length;
@@ -82,7 +82,7 @@ Where `deleteTooltip` changes depending on how many users are selected:
 
 
 The [can-util/dom/events/attributes/attributes attributes] event can be used to listen to when
-the toolip attribute changes its value like:
+the tooltip attribute changes its value like:
 
 ```js
 canViewCallbacks.attr("tooltip", function( el, attrData ) {
