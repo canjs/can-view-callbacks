@@ -65,21 +65,24 @@ In the previous example, the content of the tooltip was static. However,
 it's likely that the tooltip's value might change. For instance, the template
 might want to dynamically update the tooltip like:
 
-    <button tooltip="{{deleteTooltip()}}">
-      Delete
-    </button>
+```html
+<button tooltip="{{deleteTooltip()}}">
+  Delete
+</button>
+```
 
 Where `deleteTooltip()` changes depending on how many users are selected:
 
-    deleteTooltip: function(){
-      var selectedCount = selected.length;
-      if(selectedCount) {
-        return "Delete "+selectedCount+" users";
-      } else {
-        return "Select users to delete them.";
-      }
-    }
-
+```js
+	deleteTooltip: function(){
+		var selectedCount = selected.length
+		if(selectedCount) {
+			return "Delete "+selectedCount+" users";
+		} else {
+			return "Select users to delete them.";
+		}
+	},
+```
 
 The [can-util/dom/events/attributes/attributes attributes] event can be used to listen to when
 the tooltip attribute changes its value like:
@@ -118,15 +121,19 @@ perform rich behavior. The attribute mixin is able to read
 data from the element's [can.view.Scope scope]. For example,
 __toggle__ and __fade-in-when__ will need the value of `showing` in:
 
-    <button toggle="showing">
-      {{#showing}}Show{{else}}Hide{{/showing}} more info</button>
-    <div fade-in-when="showing">
-      Here is more info!
-    </div>
+```html
+<button toggle="showing">
+	{{#if(showing)}}Hide{{else}}Show{{/if}} more info</button>
+<div fade-in-when="showing">
+	Here is more info!
+</div>
+```
 
 These values can be read from [can-view-callbacks.attrData]'s scope like:
 
-    attrData.scope.attr("showing")
+```js
+attrData.scope.attr("showing")
+```
 
 But often, you want to update scope value or listen when the scope value
 changes. For example, the __toggle__ mixin might want to update `showing`
@@ -135,39 +142,46 @@ the `showing` changes.  Both of these can be achived by
 using [can-view-scope::compute compute] to get a get/set compute that is
 tied to the value in the scope:
 
-    var showing = attrData.scope.compute("showing")
+```js
+var showing = attrData.scope.compute("showing")
+```
 
 This value can be written to by `toggle`:
 
+```js
+canViewCallbacks.attr("toggle", function(el, attrData){
 
-    canViewCallbacks.attr("toggle", function(el, attrData){
+	var attrValue = el.getAttribute("toggle")
+		toggleCompute = attrData.scope.compute(attrValue);
 
-      var attrValue = el.getAttribute("toggle")
-          toggleCompute = attrData.scope.compute(attrValue);
+	$(el).click(function(){
+		toggleCompute(! toggleCompute() )
+	})
 
-      $(el).click(function(){
-        toggleCompute(! toggleCompute() )
-      })
-
-    })
+})
+```
 
 Or listened to by `fade-in-when`:
 
-    canViewCallbacks.attr("fade-in-when", function( el, attrData ) {
-      var attrValue = el.getAttribute("fade-in-when");
-          fadeInCompute = attrData.scope.compute(attrValue),
-          handler = function(ev, newVal, oldVal){
-            if(newVal && !oldVal) {
-              $(el).fadeIn("slow")
-            } else if(!newVal){
-              $(el).hide()
-            }
-          }
+```js
+canViewCallbacks.attr("fade-in-when", function( el, attrData ) {
+	var attrValue = el.getAttribute("fade-in-when");
+		fadeInCompute = attrData.scope.compute(attrValue),
+		// handler for when the compute changes
+		handler = function(ev, newVal, oldVal){
+			if(newVal && !oldVal) {
+				$(el).fadeIn("slow")
+			} else if(!newVal){
+				$(el).hide()
+			}
+		}
 
-      fadeInCompute.on("change",handler);
+	fadeInCompute.on("change",handler);
 
-      ...
-    });
+	...
+
+})
+```
 
 When you listen to something other than the attribute's element, remember to
 unbind the event handler when the element is [can-util/dom/events/removed/removed removed] from the page:
@@ -184,8 +198,10 @@ domEvents.addEventListener.call(el,"removed", function(){
 
 `canViewCallbacks.attr` must be called before a template is processed. When [using `can.view` to create a renderer function](http://canjs.com/docs/can.view.html#sig_can_view_idOrUrl_), `canViewCallbacks.attr` must be called before the template is loaded, not simply before it is rendered.
 
-		//Call canViewCallbacks.attr first
-		canViewCallbacks.attr('tooltip', tooltipFunction);
-		//Preload a template for rendering
-		var renderer = stache("<div tooltip='Hi There'>...</div>");
-		//No calls to canViewCallbacks.attr after this will be used by `renderer`
+```js
+//Call canViewCallbacks.attr first
+canViewCallbacks.attr('tooltip', tooltipFunction);
+//Preload a template for rendering
+var renderer = stache("<div tooltip='Hi There'>...</div>");
+//No calls to canViewCallbacks.attr after this will be used by `renderer`
+```
