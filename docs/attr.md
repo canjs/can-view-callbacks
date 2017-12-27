@@ -12,6 +12,7 @@ Handlers must be registered before templates using them are parsed.
 
 ```js
 var canViewCallbacks = require("can-view-callbacks");
+var domEvents = require("can-util/dom/events/events");
 
 canViewCallbacks.attr("show-when", function(el, attrData){
 	var prop = el.getAttribute("show-when");
@@ -150,47 +151,46 @@ var showing = attrData.scope.compute("showing")
 This value can be written to by `toggle`:
 
 ```js
-canViewCallbacks.attr("toggle", function(el, attrData){
+canViewCallbacks.attr("toggle", function(el, attrData) {
+	var attrValue = el.getAttribute("toggle");
+	var toggleCompute = attrData.scope.compute(attrValue);
 
-	var attrValue = el.getAttribute("toggle")
-		toggleCompute = attrData.scope.compute(attrValue);
-
-	$(el).click(function(){
-		toggleCompute(! toggleCompute() )
-	})
-
-})
+	$(el).click(function() {
+		toggleCompute( ! toggleCompute() );
+	});
+});
 ```
 
 Or listened to by `fade-in-when`:
 
 ```js
-canViewCallbacks.attr("fade-in-when", function( el, attrData ) {
+canViewCallbacks.attr("fade-in-when", function(el, attrData) {
 	var attrValue = el.getAttribute("fade-in-when");
-		fadeInCompute = attrData.scope.compute(attrValue),
-		// handler for when the compute changes
-		handler = function(ev, newVal, oldVal){
-			if(newVal && !oldVal) {
-				$(el).fadeIn("slow")
-			} else if(!newVal){
-				$(el).hide()
-			}
-		}
+	var fadeInCompute = attrData.scope.compute(attrValue);
 
-	fadeInCompute.on("change",handler);
+	// handler for when the observable changes
+	var handler = function(event, newVal, oldVal) {
+		if (newVal && !oldVal) {
+			$(el).fadeIn("slow")
+		} else if (!newVal) {
+			$(el).hide()
+		}
+	};
+
+	fadeInCompute.on("change", handler);
 
 	...
 
-})
+});
 ```
 
 When you listen to something other than the attribute’s element, remember to
 unbind the event handler when the element is [can-util/dom/events/removed/removed removed] from the page:
 
 ```js
-domEvents.addEventListener.call(el,"removed", function(){
-	fadeInCompute.off(handler);
-});
+	domEvents.addEventListener.call(el, "removed", function() {
+		fadeInCompute.off("change", handler);
+	});
 ```
 
 @demo demos/can-view-callbacks/fade_in_when.html
