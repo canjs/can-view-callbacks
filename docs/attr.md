@@ -62,7 +62,7 @@ a `tooltip` attribute like `<div tooltip="Click to edit">Name</div>`.
 ## Listening to attribute changes
 
 In the previous example, the content of the tooltip was static. However,
-it's likely that the tooltip's value might change. For instance, the template
+it’s likely that the tooltip’s value might change. For instance, the template
 might want to dynamically update the tooltip like:
 
 ```html
@@ -108,28 +108,29 @@ canViewCallbacks.attr("tooltip", function( el, attrData ) {
 });
 ```
 
-To see this behavior in the following demo, hover the mouse over the "Delete" button.  Then
-select some users and hover over the "Delete" button again:
+To see this behavior in the following demo, hover the mouse over the “Delete”
+button. Then select some users and hover over the “Delete” button again:
 
 @demo demos/can-view-callbacks/dynamic_tooltip.html
 
 
 ## Reading values from the scope.
 
-It's common that attribute mixins need complex, observable data to
+It’s common that attribute mixins need complex, observable data to
 perform rich behavior. The attribute mixin is able to read
-data from the element's [can.view.Scope scope]. For example,
+data from the element’s [can-view-scope scope]. For example,
 __toggle__ and __fade-in-when__ will need the value of `showing` in:
 
 ```html
 <button toggle="showing">
-	{{#if(showing)}}Hide{{else}}Show{{/if}} more info</button>
+	{{#if(showing)}}Hide{{else}}Show{{/if}} more info
+</button>
 <div fade-in-when="showing">
 	Here is more info!
 </div>
 ```
 
-These values can be read from [can-view-callbacks.attrData]'s scope like:
+These values can be read from [can-view-callbacks.attrData]’s scope like:
 
 ```js
 attrData.scope.attr("showing")
@@ -138,7 +139,7 @@ attrData.scope.attr("showing")
 But often, you want to update scope value or listen when the scope value
 changes. For example, the __toggle__ mixin might want to update `showing`
 and the __fade-in-when__ mixin needs to know when
-the `showing` changes.  Both of these can be achived by
+the `showing` changes.  Both of these can be achieved by
 using [can-view-scope::compute compute] to get a get/set compute that is
 tied to the value in the scope:
 
@@ -183,7 +184,7 @@ canViewCallbacks.attr("fade-in-when", function( el, attrData ) {
 })
 ```
 
-When you listen to something other than the attribute's element, remember to
+When you listen to something other than the attribute’s element, remember to
 unbind the event handler when the element is [can-util/dom/events/removed/removed removed] from the page:
 
 ```js
@@ -196,7 +197,9 @@ domEvents.addEventListener.call(el,"removed", function(){
 
 ## When to call
 
-`canViewCallbacks.attr` must be called before a template is processed. When [using `can.view` to create a renderer function](http://canjs.com/docs/can.view.html#sig_can_view_idOrUrl_), `canViewCallbacks.attr` must be called before the template is loaded, not simply before it is rendered.
+`canViewCallbacks.attr` must be called before a template is processed. When
+using [can-stache] to create a renderer function, `canViewCallbacks.attr` must
+be called before the template is loaded, not simply before it is rendered.
 
 ```js
 //Call canViewCallbacks.attr first
