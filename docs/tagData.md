@@ -6,10 +6,10 @@ The data passed to [can-view-callbacks.tag].
 @type {Object}
 
   @option {can-stache.renderer} [subtemplate] If the special tag has content,
-  the content can be rendered with subtemplate.  For example:
+  the content can be rendered with sub-template.  For example:
 
   ```js
-  callbacks.tag("foo-bar", function(el, tagData){
+  callbacks.tag("foo-bar", function(el, tagData) {
     var frag = tagData.subtemplate(tagData.scope, tagData.options);
     $(el).html(frag);
   });

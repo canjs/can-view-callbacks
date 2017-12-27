@@ -10,7 +10,7 @@ The data provided to [can-view-callbacks.attr].
   var stache = require("can-stache");
 
   canViewCallbacks.attr("my-attr", function(el, attrData){
-    attrData.scope.peak("value") //-> 123
+    attrData.scope.peek("value") //-> 123
 	attrData.attributeName       //-> "my-attr"
 
   });
