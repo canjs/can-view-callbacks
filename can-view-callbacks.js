@@ -1,8 +1,8 @@
 var ObservationRecorder = require('can-observation-recorder');
 
-var dev = require('can-util/js/dev/dev');
-var getGlobal = require('can-util/js/global/global');
-var domMutate = require('can-util/dom/mutate/mutate');
+var dev = require('can-log/dev/dev');
+var getGlobal = require('can-globals/global/global');
+var domMutate = require('can-dom-mutate/node');
 var namespace = require('can-namespace');
 
 //!steal-remove-start

@@ -1,6 +1,6 @@
 var QUnit = require('steal-qunit');
 var callbacks = require('can-view-callbacks');
-var dev = require('can-util/js/dev/dev');
+var dev = require('can-log/dev/dev');
 var can = require('can-namespace');
 var clone = require('steal-clone');
 var devUtils = require("can-test-helpers/lib/dev");
