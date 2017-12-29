@@ -42,7 +42,7 @@
     "can-globals": "^0.3.0",
     "can-log": "^0.1.2",
     "can-namespace": "1.0.0",
-    "can-observation-recorder": "^0.1.0",
+    "can-observation-recorder": "<2.0.0",
     "can-util": "^3.9.5"
   },
   "devDependencies": {
