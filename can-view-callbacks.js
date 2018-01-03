@@ -4,6 +4,8 @@ var dev = require('can-log/dev/dev');
 var getGlobal = require('can-globals/global/global');
 var domMutate = require('can-dom-mutate/node');
 var namespace = require('can-namespace');
+var nodeLists = require('can-view-nodelist');
+var makeFrag = require("can-util/dom/frag/frag");
 
 //!steal-remove-start
 var requestedAttributes = {};
@@ -123,7 +125,7 @@ var callbacks = {
 			var ceConstructor = GLOBAL.document.createElement(tagName).constructor;
 			// If not registered as a custom element, the browser will use default constructors
 			if (ceConstructor === GLOBAL.HTMLElement || ceConstructor === GLOBAL.HTMLUnknownElement) {
-				dev.warn('can-view-callbacks: No custom element found for ' + tagName);	
+				dev.warn('can-view-callbacks: No custom element found for ' + tagName);
 			}
 		}
 		//!steal-remove-end
@@ -135,8 +137,12 @@ var callbacks = {
 			if (scope !== res) {
 				scope = scope.add(res);
 			}
-			var result = tagData.subtemplate(scope, tagData.options);
-			var frag = typeof result === "string" ? can.view.frag(result) : result;
+
+			var nodeList = nodeLists.register([], undefined, tagData.parentNodeList || true, false);
+			nodeList.expression = "<" + el.tagName + ">";
+
+			var result = tagData.subtemplate(scope, tagData.options, nodeList);
+			var frag = typeof result === "string" ? makeFrag(result) : result;
 			domMutate.appendChild.call(el, frag);
 		}
 	}
