@@ -1,5 +1,6 @@
 var QUnit = require('steal-qunit');
 var callbacks = require('can-view-callbacks');
+var nodeLists = require('can-view-nodelist');
 var dev = require('can-log/dev/dev');
 var can = require('can-namespace');
 var clone = require('steal-clone');
@@ -120,7 +121,7 @@ if (System.env.indexOf('production') < 0) {
 QUnit.test("should return callback (#60)", function(){
 	var handler = function() {};
 	callbacks.attr('foo', handler);
-	
+
 	var fooHandler = callbacks.attr('foo');
 	equal(fooHandler, handler, 'registered handler returned');
 });
@@ -131,7 +132,7 @@ if(document.registerElement) {
 		var restore = devUtils.willWarn(/no custom element found for/i);
 		testTagHandler(customElement);
 		equal(restore(), 1);
-	});	
+	});
 
 	devUtils.devOnlyTest("should not warn about defined custom elements (#56)", function(){
 		document.registerElement('custom-element', {});
@@ -139,7 +140,7 @@ if(document.registerElement) {
 		var restore = devUtils.willWarn(/no custom element found for/i);
 		testTagHandler(customElement);
 		equal(restore(), 0);
-	});	
+	});
 }
 
 function testTagHandler(customElement){
@@ -165,5 +166,27 @@ QUnit.test("can read tags from templateContext.tags", function() {
 	var el = document.createElement('div');
 	var fooHandler = callbacks.tagHandler(el, 'foo', {
 		scope: scope
+	});
+});
+
+QUnit.test("Passes through nodeList", function(){
+	QUnit.expect(2);
+
+	var nodeList = nodeLists.register([], null, true, false);
+
+	var scope = new Scope({});
+
+	callbacks.tag("nodelist-tag", function(){
+		return {};
+	});
+	var el = document.createElement("div");
+	callbacks.tagHandler(el, "nodelist-tag", {
+		scope: scope,
+		parentNodeList: nodeList,
+		subtemplate: function(scope, helpers, localNodeList){
+			QUnit.ok(localNodeList, "nodeList was provided");
+			QUnit.equal(localNodeList.parentList, nodeList, "it is our provided nodeList");
+			return "<div></div>";
+		}
 	});
 });
