@@ -1,10 +1,9 @@
 var QUnit = require('steal-qunit');
 var callbacks = require('can-view-callbacks');
 var nodeLists = require('can-view-nodelist');
-var dev = require('can-log/dev/dev');
 var can = require('can-namespace');
 var clone = require('steal-clone');
-var devUtils = require("can-test-helpers/lib/dev");
+var testHelpers = require("can-test-helpers/lib/dev");
 var Scope = require("can-view-scope");
 
 QUnit.module('can-view-callbacks');
@@ -21,23 +20,18 @@ QUnit.test("Placed as view.callbacks on the can namespace", function(){
 	equal(callbacks, can.view.callbacks, "Namespace value as can.view.callbacks");
 });
 
-if (System.env.indexOf('production') < 0) {
-	QUnit.test("Show warning if in tag name a hyphen is missed", function () {
-		var tagName = "foobar";
-		var oldlog = dev.warn;
-		dev.warn = function(text) {
-			ok(text, "got warning");
-			equal(text, "Custom tag: " + tagName.toLowerCase() + " hyphen missed");
-			dev.warn = oldlog;
-		};
+testHelpers.devOnlyTest("Show warning if in tag name a hyphen is missed", function () {
+	var tagName = "foobar";
+	var teardown = testHelpers.willWarn("Custom tag: " + tagName.toLowerCase() + " hyphen missed");
 
-		// make sure tag doesn't already exist
-		callbacks.tag(tagName, null);
+	// make sure tag doesn't already exist
+	callbacks.tag(tagName, null);
 
-		// add tag
-		callbacks.tag(tagName, function(){});
-	});
-}
+	// add tag
+	callbacks.tag(tagName, function(){});
+
+	equal(teardown(), 1, "got warning");
+});
 
 QUnit.test("remove a tag by passing null as second argument", function() {
 	var tagName = "my-tag";
@@ -75,48 +69,40 @@ QUnit.test('should throw if can-namespace.view.callbacks is already defined', fu
 });
 
 
-if (System.env.indexOf('production') < 0) {
-	QUnit.test("should warn if attr callback defined after attr requested (#57)", function () {
-		var attrName = "masonry-wall";
-		var oldlog = dev.warn;
-		dev.warn = function(text) {
-			ok(text, "got warning");
-			equal(text, "can-view-callbacks: " + attrName+ " custom attribute behavior requested before it was defined.  Make sure "+attrName+" is defined before it is needed.");
-			dev.warn = oldlog;
-		};
+testHelpers.devOnlyTest("should warn if attr callback defined after attr requested (#57)", function () {
+	var attrName = "masonry-wall";
+	var teardown = testHelpers.willWarn("can-view-callbacks: " + attrName+ " custom attribute behavior requested before it was defined.  Make sure "+attrName+" is defined before it is needed.");
 
-		// calback attr requested
-		callbacks.attr(attrName);
+	// calback attr requested
+	callbacks.attr(attrName);
 
-		// callback attr provided
-		callbacks.attr(attrName, function(){});
-	});
+	// callback attr provided
+	callbacks.attr(attrName, function(){});
 
-	QUnit.test("should warn if RegExp attr callback defined after attr requested (#57)", function () {
-		var attrName = "masonry-wall";
-		var attrMatch = /masonry[- ]?wall/;
-		var oldlog = dev.warn;
-		dev.warn = function(text) {
-			ok(text, "got warning");
-			equal(text, "can-view-callbacks: " + attrName+ " custom attribute behavior requested before it was defined.  Make sure "+attrMatch.toString()+" is defined before it is needed.");
-			dev.warn = oldlog;
-		};
+	equal(teardown(), 1, "got warning");
+});
 
-		// calback attr requested
-		callbacks.attr(attrName);
+testHelpers.devOnlyTest("should warn if RegExp attr callback defined after attr requested (#57)", function () {
+	var attrName = "masonry-wall";
+	var attrMatch = /masonry[- ]?wall/;
+	var teardown = testHelpers.willWarn("can-view-callbacks: " + attrName+ " custom attribute behavior requested before it was defined.  Make sure "+attrMatch.toString()+" is defined before it is needed.");
 
-		// callback attr provided
-		callbacks.attr(attrMatch, function(){});
-	});
+	// calback attr requested
+	callbacks.attr(attrName);
 
-	QUnit.test("tag method should return default callback when valid tag but not registered", function () {
-		equal(callbacks.tag('not-exist'), callbacks.defaultCallback, "used default noop function")
-	});
+	// callback attr provided
+	callbacks.attr(attrMatch, function(){});
 
-	QUnit.test("tag method should return undefined when invalid tag and not registered", function () {
-		notOk(callbacks.tag('notexist'), "used default noop function")
-	});
-}
+	equal(teardown(), 1, "got warning");
+});
+
+QUnit.test("tag method should return default callback when valid tag but not registered", function () {
+	equal(callbacks.tag('not-exist'), callbacks.defaultCallback, "used default noop function")
+});
+
+QUnit.test("tag method should return undefined when invalid tag and not registered", function () {
+	notOk(callbacks.tag('notexist'), "used default noop function")
+});
 
 QUnit.test("should return callback (#60)", function(){
 	var handler = function() {};
@@ -127,17 +113,17 @@ QUnit.test("should return callback (#60)", function(){
 });
 
 if(document.registerElement) {
-	devUtils.devOnlyTest("should warn about missing custom elements (#56)", function(){
+	testHelpers.devOnlyTest("should warn about missing custom elements (#56)", function(){
 		var customElement = document.createElement('custom-element');
-		var restore = devUtils.willWarn(/no custom element found for/i);
+		var restore = testHelpers.willWarn(/no custom element found for/i);
 		testTagHandler(customElement);
 		equal(restore(), 1);
 	});
 
-	devUtils.devOnlyTest("should not warn about defined custom elements (#56)", function(){
+	testHelpers.devOnlyTest("should not warn about defined custom elements (#56)", function(){
 		document.registerElement('custom-element', {});
 		var customElement = document.createElement('custom-element');
-		var restore = devUtils.willWarn(/no custom element found for/i);
+		var restore = testHelpers.willWarn(/no custom element found for/i);
 		testTagHandler(customElement);
 		equal(restore(), 0);
 	});
