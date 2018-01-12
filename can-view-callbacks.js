@@ -6,7 +6,6 @@ var domMutate = require('can-dom-mutate/node');
 var namespace = require('can-namespace');
 var nodeLists = require('can-view-nodelist');
 var makeFrag = require("can-util/dom/frag/frag");
-var canSymbol = require("can-symbol");
 
 //!steal-remove-start
 var requestedAttributes = {};
@@ -14,27 +13,25 @@ var requestedAttributes = {};
 
 var tags = {};
 
-var viewmodelSymbol = canSymbol.for("can.viewModel");
+// WeakSet containing elements that have been rendered already
+// and therefore do not need to be rendered again
+var renderedElements = new WeakSet();
 
-// WeakSet containing elements that have been mounted already
-// and therefore do not need to be mounted again
-var mountedElements = new WeakSet();
-
-var mountNodeAndChildrenIfNecessary = function(node) {
+var renderNodeAndChildren = function(node) {
 	var tagName = node.tagName && node.tagName.toLowerCase();
 	var tagHandler = tags[tagName];
 	var children;
 
 	// skip elements that already have a viewmodel or elements whose tags don't match a registered tag
-	// or elements that have already been mounted
-	if (!node[viewmodelSymbol] && tagHandler && !mountedElements.has(node)) {
+	// or elements that have already been rendered
+	if (tagHandler && !renderedElements.has(node)) {
 		tagHandler(node, tagName, {});
 	}
 
 	if (node.getElementsByTagName) {
 		children = node.getElementsByTagName("*");
 		for (var k=0, child; (child = children[k]) !== undefined; k++) {
-			mountNodeAndChildrenIfNecessary(child);
+			renderNodeAndChildren(child);
 		}
 	}
 };
@@ -53,9 +50,9 @@ var enableMutationObserver = function() {
 				addedNodes = mutation.addedNodes;
 
 				for (var j=0, addedNode; (addedNode = addedNodes[j]) !== undefined; j++) {
-					// skip elements that have already been mounted
-					if (!mountedElements.has(addedNode)) {
-						mountNodeAndChildrenIfNecessary(addedNode);
+					// skip elements that have already been rendered
+					if (!renderedElements.has(addedNode)) {
+						renderNodeAndChildren(addedNode);
 					}
 				}
 			}
@@ -68,11 +65,11 @@ var enableMutationObserver = function() {
 	mutationObserverEnabled = true;
 };
 
-var mountExistingElements = function(tagName) {
+var renderTagsInDocument = function(tagName) {
 	var nodes = getGlobal().document.getElementsByTagName(tagName);
 
 	for (var i=0, node; (node = nodes[i]) !== undefined; i++) {
-		mountNodeAndChildrenIfNecessary(node);
+		renderNodeAndChildren(node);
 	}
 };
 
@@ -146,7 +143,7 @@ var tag = function (tagName, tagHandler) {
 
 		tags[tagName.toLowerCase()] = tagHandler;
 
-		// automatically mount elements that have tagHandlers
+		// automatically render elements that have tagHandlers
 		// If browser supports customElements, register the tag as a custom element
 		if ("customElements" in GLOBAL) {
 			var CustomElement = function() {
@@ -154,8 +151,8 @@ var tag = function (tagName, tagHandler) {
 			};
 
 			CustomElement.prototype.connectedCallback = function() {
-				// don't re-mount an element that has been mounted already
-				if (!mountedElements.has(this)) {
+				// don't re-render an element that has been rendered already
+				if (!renderedElements.has(this)) {
 					tagHandler(this, tagName, {});
 				}
 			};
@@ -166,11 +163,11 @@ var tag = function (tagName, tagHandler) {
 			customElements.define(tagName, CustomElement);
 		}
 		// If browser doesn't support customElements, set up MutationObserver for
-		// mounting elements when they are inserted in the page
-		// and mount elements that are already in the page
+		// rendering elements when they are inserted in the page
+		// and rendering elements that are already in the page
 		else {
 			enableMutationObserver();
-			mountExistingElements(tagName);
+			renderTagsInDocument(tagName);
 		}
 	} else {
 		var cb;
@@ -198,18 +195,20 @@ var callbacks = {
 	defaultCallback: defaultCallback,
 	tag: tag,
 	attr: attr,
-	mountedElements: mountedElements,
 	// handles calling back a tag callback
 	tagHandler: function(el, tagName, tagData){
-		var helperTagCallback = tagData.scope.templateContext.tags.get(tagName),
-			tagCallback = helperTagCallback || tags[tagName];
-
-		// If this was an element like <foo-bar> that doesn't have a component, just render its content
 		var scope = tagData.scope,
+			helperTagCallback = scope && scope.templateContext.tags.get(tagName),
+			tagCallback = helperTagCallback || tags[tagName],
 			res;
 
+		// If this was an element like <foo-bar> that doesn't have a component, just render its content
 		if(tagCallback) {
 			res = ObservationRecorder.ignore(tagCallback)(el, tagData);
+
+			// add the element to the Set of elements that have had their handlers called
+			// this will prevent the handler from being called again when the element is inserted
+			renderedElements.add(el);
 		} else {
 			res = scope;
 		}

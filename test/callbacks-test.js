@@ -190,7 +190,7 @@ QUnit.test("Passes through nodeList", function(){
 	});
 });
 
-QUnit.test("tag handler is called automatically for elements inserted into the page", function() {
+QUnit.test("tag handler is called automatically when elements are inserted into the page", function() {
 	var fixture = document.getElementById('qunit-fixture');
 
 	callbacks.tag("the-el", function(el) {
@@ -224,11 +224,12 @@ QUnit.test("tag handler is called automatically for elements inserted into the p
 	});
 });
 
-QUnit.test("tag handler is not called automatically for elements in mountedElements Set", function() {
+QUnit.test("tag handler is not called again when elements are inserted into the page if it has been called already", function() {
 	var fixture = document.getElementById('qunit-fixture');
 
 	callbacks.tag("another-el", function(el) {
-		el.innerHTML = "This is another el";
+		var textNode = document.createTextNode("This is another el");
+		el.appendChild(textNode);
 	});
 
 	// <another-el />
@@ -241,9 +242,9 @@ QUnit.test("tag handler is not called automatically for elements in mountedEleme
 	var elTwo = document.createElement("another-el");
 	var elThree = document.createElement("another-el");
 
-	callbacks.mountedElements.add(elOne);
-	callbacks.mountedElements.add(elTwo);
-	callbacks.mountedElements.add(elThree);
+	callbacks.tagHandler(elOne, "another-el", {});
+	callbacks.tagHandler(elTwo, "another-el", {});
+	callbacks.tagHandler(elThree, "another-el", {});
 
 	div.appendChild(elTwo);
 	div.appendChild(elThree);
@@ -257,12 +258,12 @@ QUnit.test("tag handler is not called automatically for elements in mountedEleme
 		var els = fixture.getElementsByTagName("another-el");
 
 		for (var i=0; i<els.length; i++) {
-			QUnit.equal(els[i].innerHTML, "", "<another-el>[" + i + "] not rendered");
+			QUnit.equal(els[i].innerHTML, "This is another el", "<another-el>[" + i + "] not rendered");
 		}
 	});
 });
 
-QUnit.test("tag handler is called automatically for elements already in the page when it is registered", function() {
+QUnit.test("when tagHandler is registered, it is called automatically for elements already in the page", function() {
 	var fixture = document.getElementById('qunit-fixture');
 
 	// <existing-el />
