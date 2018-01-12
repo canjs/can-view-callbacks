@@ -33,7 +33,7 @@ QUnit.test("Placed as view.callbacks on the can namespace", function(){
 	equal(callbacks, can.view.callbacks, "Namespace value as can.view.callbacks");
 });
 
-testHelpers.devOnlyTest("Show warning if in tag name a hyphen is missed", function () {
+testHelpers.devOnlyTest("Show warning if in tag name a hyphen is missed, but still create handler", function () {
 	var tagName = "foobar";
 	var teardown = testHelpers.willWarn("Custom tag: " + tagName.toLowerCase() + " hyphen missed");
 
@@ -41,9 +41,21 @@ testHelpers.devOnlyTest("Show warning if in tag name a hyphen is missed", functi
 	callbacks.tag(tagName, null);
 
 	// add tag
-	callbacks.tag(tagName, function(){});
+	callbacks.tag(tagName, function(el) {
+		var textNode = document.createTextNode("This is the " + tagName + " tag");
+		el.appendChild(textNode);
+	});
 
 	equal(teardown(), 1, "got warning");
+
+	var el = document.createElement(tagName);
+	callbacks.tagHandler(el, tagName, {});
+
+	QUnit.stop();
+	afterMutation(function() {
+		QUnit.start();
+		QUnit.equal(el.innerHTML, "This is the " + tagName + " tag");
+	});
 });
 
 QUnit.test("remove a tag by passing null as second argument", function() {
@@ -298,10 +310,25 @@ QUnit.test("when tagHandler is registered, it is called automatically for elemen
 });
 
 QUnit.test("creating a tag for `content` should work", function() {
-	callbacks.tag("content", function() {
-		var textNode = document.createTextNode("This is another el");
+	var fixture = document.getElementById('qunit-fixture');
+
+	callbacks.tag("content", function(el) {
+		var textNode = document.createTextNode("This is the content");
 		el.appendChild(textNode);
 	});
 
 	ok(true, "did not throw error");
+
+	var contentEl = document.createElement("content");
+	callbacks.tagHandler(contentEl, "content", {});
+
+	QUnit.stop();
+	afterMutation(function() {
+		QUnit.start();
+		var els = fixture.getElementsByTagName("content");
+
+		for (var i=0; i<els.length; i++) {
+			QUnit.equal(els[i].innerHTML, "This is the content");
+		}
+	});
 });

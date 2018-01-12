@@ -134,7 +134,6 @@ var tag = function (tagName, tagHandler) {
 
 		if (!validCustomElementName && tagName !== "content") {
 			dev.warn("Custom tag: " + tagName.toLowerCase() + " hyphen missed");
-			return;
 		}
 		//!steal-remove-end
 
