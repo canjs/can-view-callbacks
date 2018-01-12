@@ -21,7 +21,10 @@
 		"start": true,
 		"stop": true,
 		"global": true,
-		"Promise": true
+		"Promise": true,
+		"customElements": true,
+		"Reflect": true,
+		"WeakSet": true
 	},
 	"strict": false,
 	"curly": true,

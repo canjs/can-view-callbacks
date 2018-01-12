@@ -11,6 +11,68 @@ var makeFrag = require("can-util/dom/frag/frag");
 var requestedAttributes = {};
 //!steal-remove-end
 
+var tags = {};
+
+// WeakSet containing elements that have been rendered already
+// and therefore do not need to be rendered again
+var renderedElements = new WeakSet();
+
+var renderNodeAndChildren = function(node) {
+	var tagName = node.tagName && node.tagName.toLowerCase();
+	var tagHandler = tags[tagName];
+	var children;
+
+	// skip elements that already have a viewmodel or elements whose tags don't match a registered tag
+	// or elements that have already been rendered
+	if (tagHandler && !renderedElements.has(node)) {
+		tagHandler(node, tagName, {});
+	}
+
+	if (node.getElementsByTagName) {
+		children = node.getElementsByTagName("*");
+		for (var k=0, child; (child = children[k]) !== undefined; k++) {
+			renderNodeAndChildren(child);
+		}
+	}
+};
+
+var mutationObserverEnabled = false;
+var enableMutationObserver = function() {
+	if (mutationObserverEnabled) {
+		return;
+	}
+
+	var mutationHandler = function(mutationsList) {
+		var addedNodes;
+
+		for (var i=0, mutation; (mutation = mutationsList[i]) !== undefined; i++) {
+			if (mutation.type === "childList") {
+				addedNodes = mutation.addedNodes;
+
+				for (var j=0, addedNode; (addedNode = addedNodes[j]) !== undefined; j++) {
+					// skip elements that have already been rendered
+					if (!renderedElements.has(addedNode)) {
+						renderNodeAndChildren(addedNode);
+					}
+				}
+			}
+		}
+	};
+
+	var obs = new MutationObserver(mutationHandler);
+	obs.observe(getGlobal().document.documentElement, { childList: true, subtree: true });
+
+	mutationObserverEnabled = true;
+};
+
+var renderTagsInDocument = function(tagName) {
+	var nodes = getGlobal().document.getElementsByTagName(tagName);
+
+	for (var i=0, node; (node = nodes[i]) !== undefined; i++) {
+		renderNodeAndChildren(node);
+	}
+};
+
 var attr = function (attributeName, attrHandler) {
 	if(attrHandler) {
 		if (typeof attributeName === "string") {
@@ -62,14 +124,20 @@ var tag = function (tagName, tagHandler) {
 	if(tagHandler) {
 		var GLOBAL = getGlobal();
 
+		var validCustomElementName = automaticCustomElementCharacters.test(tagName);
+
 		//!steal-remove-start
 		if (typeof tags[tagName.toLowerCase()] !== 'undefined') {
 			dev.warn("Custom tag: " + tagName.toLowerCase() + " is already defined");
+			return;
 		}
-		if (!automaticCustomElementCharacters.test(tagName) && tagName !== "content") {
+
+		if (!validCustomElementName && tagName !== "content") {
 			dev.warn("Custom tag: " + tagName.toLowerCase() + " hyphen missed");
+			return;
 		}
 		//!steal-remove-end
+
 		// if we have html5shiv ... re-generate
 		if (GLOBAL.html5) {
 			GLOBAL.html5.elements += " " + tagName;
@@ -77,6 +145,35 @@ var tag = function (tagName, tagHandler) {
 		}
 
 		tags[tagName.toLowerCase()] = tagHandler;
+
+		// automatically render elements that have tagHandlers
+		// If browser supports customElements, register the tag as a custom element
+		if ("customElements" in GLOBAL) {
+			if (validCustomElementName) {
+				var CustomElement = function() {
+					return Reflect.construct(HTMLElement, [], CustomElement);
+				};
+
+				CustomElement.prototype.connectedCallback = function() {
+					// don't re-render an element that has been rendered already
+					if (!renderedElements.has(this)) {
+						tagHandler(this, tagName, {});
+					}
+				};
+
+				Object.setPrototypeOf(CustomElement.prototype, HTMLElement.prototype);
+				Object.setPrototypeOf(CustomElement, HTMLElement);
+
+				customElements.define(tagName, CustomElement);
+			}
+		}
+		// If browser doesn't support customElements, set up MutationObserver for
+		// rendering elements when they are inserted in the page
+		// and rendering elements that are already in the page
+		else {
+			enableMutationObserver();
+			renderTagsInDocument(tagName);
+		}
 	} else {
 		var cb;
 
@@ -95,7 +192,6 @@ var tag = function (tagName, tagHandler) {
 	}
 
 };
-var tags = {};
 
 var callbacks = {
 	_tags: tags,
@@ -106,15 +202,18 @@ var callbacks = {
 	attr: attr,
 	// handles calling back a tag callback
 	tagHandler: function(el, tagName, tagData){
-		var helperTagCallback = tagData.scope.templateContext.tags.get(tagName),
-			tagCallback = helperTagCallback || tags[tagName];
-
-		// If this was an element like <foo-bar> that doesn't have a component, just render its content
 		var scope = tagData.scope,
+			helperTagCallback = scope && scope.templateContext.tags.get(tagName),
+			tagCallback = helperTagCallback || tags[tagName],
 			res;
 
+		// If this was an element like <foo-bar> that doesn't have a component, just render its content
 		if(tagCallback) {
 			res = ObservationRecorder.ignore(tagCallback)(el, tagData);
+
+			// add the element to the Set of elements that have had their handlers called
+			// this will prevent the handler from being called again when the element is inserted
+			renderedElements.add(el);
 		} else {
 			res = scope;
 		}
