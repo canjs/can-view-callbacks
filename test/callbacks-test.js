@@ -5,6 +5,19 @@ var can = require('can-namespace');
 var clone = require('steal-clone');
 var testHelpers = require("can-test-helpers/lib/dev");
 var Scope = require("can-view-scope");
+var domMutate = require('can-dom-mutate');
+var domMutateNode = require('can-dom-mutate/node');
+var globals = require('can-globals');
+
+function afterMutation(cb) {
+	var doc = globals.getKeyValue('document');
+	var div = doc.createElement("div");
+	domMutate.onNodeInsertion(div, function(){
+		doc.body.removeChild(div);
+		setTimeout(cb, 5);
+	});
+	domMutateNode.appendChild.call(doc.body, div);
+}
 
 QUnit.module('can-view-callbacks');
 
@@ -173,6 +186,112 @@ QUnit.test("Passes through nodeList", function(){
 			QUnit.ok(localNodeList, "nodeList was provided");
 			QUnit.equal(localNodeList.parentList, nodeList, "it is our provided nodeList");
 			return "<div></div>";
+		}
+	});
+});
+
+QUnit.test("tag handler is called automatically for elements inserted into the page", function() {
+	var fixture = document.getElementById('qunit-fixture');
+
+	callbacks.tag("the-el", function(el) {
+		el.innerHTML = "This is the el";
+	});
+
+	// <the-el />
+	// <div>
+	//   <the-el />
+	//   <the-el />
+	// </div>
+	var elOne = document.createElement("the-el");
+	var div = document.createElement("div");
+	var elTwo = document.createElement("the-el");
+	var elThree = document.createElement("the-el");
+
+	div.appendChild(elTwo);
+	div.appendChild(elThree);
+
+	fixture.appendChild(elOne);
+	fixture.appendChild(div);
+
+	QUnit.stop();
+	afterMutation(function() {
+		QUnit.start();
+		var els = fixture.getElementsByTagName("the-el");
+
+		for (var i=0; i<els.length; i++) {
+			QUnit.equal(els[i].innerHTML, "This is the el", "<the-el>[" + i + "] rendered correctly");
+		}
+	});
+});
+
+QUnit.test("tag handler is not called automatically for elements in mountedElements Set", function() {
+	var fixture = document.getElementById('qunit-fixture');
+
+	callbacks.tag("another-el", function(el) {
+		el.innerHTML = "This is another el";
+	});
+
+	// <another-el />
+	// <div>
+	//   <another-el />
+	//   <another-el />
+	// </div>
+	var elOne = document.createElement("another-el");
+	var div = document.createElement("div");
+	var elTwo = document.createElement("another-el");
+	var elThree = document.createElement("another-el");
+
+	callbacks.mountedElements.add(elOne);
+	callbacks.mountedElements.add(elTwo);
+	callbacks.mountedElements.add(elThree);
+
+	div.appendChild(elTwo);
+	div.appendChild(elThree);
+
+	fixture.appendChild(elOne);
+	fixture.appendChild(div);
+
+	QUnit.stop();
+	afterMutation(function() {
+		QUnit.start();
+		var els = fixture.getElementsByTagName("another-el");
+
+		for (var i=0; i<els.length; i++) {
+			QUnit.equal(els[i].innerHTML, "", "<another-el>[" + i + "] not rendered");
+		}
+	});
+});
+
+QUnit.test("tag handler is called automatically for elements already in the page when it is registered", function() {
+	var fixture = document.getElementById('qunit-fixture');
+
+	// <existing-el />
+	// <div>
+	//   <existing-el />
+	//   <existing-el />
+	// </div>
+	var elOne = document.createElement("existing-el");
+	var div = document.createElement("div");
+	var elTwo = document.createElement("existing-el");
+	var elThree = document.createElement("existing-el");
+
+	div.appendChild(elTwo);
+	div.appendChild(elThree);
+
+	fixture.appendChild(elOne);
+	fixture.appendChild(div);
+
+	callbacks.tag("existing-el", function(el) {
+		el.innerHTML = "This is an existing el";
+	});
+
+	QUnit.stop();
+	afterMutation(function() {
+		QUnit.start();
+		var els = fixture.getElementsByTagName("existing-el");
+
+		for (var i=0; i<els.length; i++) {
+			QUnit.equal(els[i].innerHTML, "This is an existing el", "<existing-el>[" + i + "] rendered correctly");
 		}
 	});
 });

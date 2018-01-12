@@ -6,10 +6,77 @@ var domMutate = require('can-dom-mutate/node');
 var namespace = require('can-namespace');
 var nodeLists = require('can-view-nodelist');
 var makeFrag = require("can-util/dom/frag/frag");
+var canSymbol = require("can-symbol");
 
 //!steal-remove-start
 var requestedAttributes = {};
 //!steal-remove-end
+
+var tags = {};
+
+var GLOBAL = getGlobal();
+var supportsCustomElements = "customElements" in GLOBAL;
+var viewmodelSymbol = canSymbol.for("can.viewModel");
+
+// WeakSet containing elements that have been mounted already
+// and therefore do not need to be mounted again
+var mountedElements = new WeakSet();
+
+var mountNodeAndChildrenIfNecessary = function(node) {
+	var tagName = node.tagName && node.tagName.toLowerCase();
+	var tagHandler = tags[tagName];
+	var children;
+
+	// skip elements that already have a viewmodel or elements whose tags don't match a registered tag
+	// or elements that have already been mounted
+	if (!node[viewmodelSymbol] && tagHandler && !mountedElements.has(node)) {
+		tagHandler(node, tagName, {});
+	}
+
+	if (node.getElementsByTagName) {
+		children = node.getElementsByTagName("*");
+		for (var k=0, child; (child = children[k]) !== undefined; k++) {
+			mountNodeAndChildrenIfNecessary(child);
+		}
+	}
+};
+
+var mutationObserverEnabled = false;
+var enableMutationObserver = function() {
+	if (mutationObserverEnabled) {
+		return;
+	}
+
+	var mutationHandler = function(mutationsList) {
+		var addedNodes;
+
+		for (var i=0, mutation; (mutation = mutationsList[i]) !== undefined; i++) {
+			if (mutation.type === "childList") {
+				addedNodes = mutation.addedNodes;
+
+				for (var j=0, addedNode; (addedNode = addedNodes[j]) !== undefined; j++) {
+					// skip elements that have already been mounted
+					if (!mountedElements.has(addedNode)) {
+						mountNodeAndChildrenIfNecessary(addedNode);
+					}
+				}
+			}
+		}
+	};
+
+	var obs = new MutationObserver(mutationHandler);
+	obs.observe(GLOBAL.document.documentElement, { childList: true, subtree: true });
+
+	mutationObserverEnabled = true;
+};
+
+var mountExistingElements = function(tagName) {
+	var nodes = GLOBAL.document.getElementsByTagName(tagName);
+
+	for (var i=0, node; (node = nodes[i]) !== undefined; i++) {
+		mountNodeAndChildrenIfNecessary(node);
+	}
+};
 
 var attr = function (attributeName, attrHandler) {
 	if(attrHandler) {
@@ -60,14 +127,14 @@ var defaultCallback = function () {};
 
 var tag = function (tagName, tagHandler) {
 	if(tagHandler) {
-		var GLOBAL = getGlobal();
-
 		//!steal-remove-start
 		if (typeof tags[tagName.toLowerCase()] !== 'undefined') {
 			dev.warn("Custom tag: " + tagName.toLowerCase() + " is already defined");
+			return;
 		}
 		if (!automaticCustomElementCharacters.test(tagName) && tagName !== "content") {
 			dev.warn("Custom tag: " + tagName.toLowerCase() + " hyphen missed");
+			return;
 		}
 		//!steal-remove-end
 		// if we have html5shiv ... re-generate
@@ -77,6 +144,33 @@ var tag = function (tagName, tagHandler) {
 		}
 
 		tags[tagName.toLowerCase()] = tagHandler;
+
+		// automatically mount elements that have tagHandlers
+		// If browser supports customElements, register the tag as a custom element
+		if (supportsCustomElements) {
+			var CustomElement = function() {
+				return Reflect.construct(HTMLElement, [], CustomElement);
+			};
+
+			CustomElement.prototype.connectedCallback = function() {
+				// don't re-mount an element that has been mounted already
+				if (!mountedElements.has(this)) {
+					tagHandler(this, tagName, {});
+				}
+			};
+
+			Object.setPrototypeOf(CustomElement.prototype, HTMLElement.prototype);
+			Object.setPrototypeOf(CustomElement, HTMLElement);
+
+			customElements.define(tagName, CustomElement);
+		}
+		// If browser doesn't support customElements, set up MutationObserver for
+		// mounting elements when they are inserted in the page
+		// and mount elements that are already in the page
+		else {
+			enableMutationObserver();
+			mountExistingElements(tagName);
+		}
 	} else {
 		var cb;
 
@@ -95,7 +189,6 @@ var tag = function (tagName, tagHandler) {
 	}
 
 };
-var tags = {};
 
 var callbacks = {
 	_tags: tags,
@@ -104,6 +197,7 @@ var callbacks = {
 	defaultCallback: defaultCallback,
 	tag: tag,
 	attr: attr,
+	mountedElements: mountedElements,
 	// handles calling back a tag callback
 	tagHandler: function(el, tagName, tagData){
 		var helperTagCallback = tagData.scope.templateContext.tags.get(tagName),
@@ -121,7 +215,6 @@ var callbacks = {
 
 		//!steal-remove-start
 		if (!tagCallback) {
-			var GLOBAL = getGlobal();
 			var ceConstructor = GLOBAL.document.createElement(tagName).constructor;
 			// If not registered as a custom element, the browser will use default constructors
 			if (ceConstructor === GLOBAL.HTMLElement || ceConstructor === GLOBAL.HTMLUnknownElement) {
