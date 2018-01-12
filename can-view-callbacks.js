@@ -14,8 +14,6 @@ var requestedAttributes = {};
 
 var tags = {};
 
-var GLOBAL = getGlobal();
-var supportsCustomElements = "customElements" in GLOBAL;
 var viewmodelSymbol = canSymbol.for("can.viewModel");
 
 // WeakSet containing elements that have been mounted already
@@ -65,13 +63,13 @@ var enableMutationObserver = function() {
 	};
 
 	var obs = new MutationObserver(mutationHandler);
-	obs.observe(GLOBAL.document.documentElement, { childList: true, subtree: true });
+	obs.observe(getGlobal().document.documentElement, { childList: true, subtree: true });
 
 	mutationObserverEnabled = true;
 };
 
 var mountExistingElements = function(tagName) {
-	var nodes = GLOBAL.document.getElementsByTagName(tagName);
+	var nodes = getGlobal().document.getElementsByTagName(tagName);
 
 	for (var i=0, node; (node = nodes[i]) !== undefined; i++) {
 		mountNodeAndChildrenIfNecessary(node);
@@ -127,6 +125,8 @@ var defaultCallback = function () {};
 
 var tag = function (tagName, tagHandler) {
 	if(tagHandler) {
+		var GLOBAL = getGlobal();
+
 		//!steal-remove-start
 		if (typeof tags[tagName.toLowerCase()] !== 'undefined') {
 			dev.warn("Custom tag: " + tagName.toLowerCase() + " is already defined");
@@ -137,6 +137,7 @@ var tag = function (tagName, tagHandler) {
 			return;
 		}
 		//!steal-remove-end
+
 		// if we have html5shiv ... re-generate
 		if (GLOBAL.html5) {
 			GLOBAL.html5.elements += " " + tagName;
@@ -147,7 +148,7 @@ var tag = function (tagName, tagHandler) {
 
 		// automatically mount elements that have tagHandlers
 		// If browser supports customElements, register the tag as a custom element
-		if (supportsCustomElements) {
+		if ("customElements" in GLOBAL) {
 			var CustomElement = function() {
 				return Reflect.construct(HTMLElement, [], CustomElement);
 			};
@@ -215,6 +216,7 @@ var callbacks = {
 
 		//!steal-remove-start
 		if (!tagCallback) {
+			var GLOBAL = getGlobal();
 			var ceConstructor = GLOBAL.document.createElement(tagName).constructor;
 			// If not registered as a custom element, the browser will use default constructors
 			if (ceConstructor === GLOBAL.HTMLElement || ceConstructor === GLOBAL.HTMLUnknownElement) {
