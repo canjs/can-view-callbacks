@@ -296,3 +296,12 @@ QUnit.test("when tagHandler is registered, it is called automatically for elemen
 		}
 	});
 });
+
+QUnit.test("creating a tag for `content` should work", function() {
+	callbacks.tag("content", function() {
+		var textNode = document.createTextNode("This is another el");
+		el.appendChild(textNode);
+	});
+
+	ok(true, "did not throw error");
+});

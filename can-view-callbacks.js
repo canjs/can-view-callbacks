@@ -124,12 +124,15 @@ var tag = function (tagName, tagHandler) {
 	if(tagHandler) {
 		var GLOBAL = getGlobal();
 
+		var validCustomElementName = automaticCustomElementCharacters.test(tagName);
+
 		//!steal-remove-start
 		if (typeof tags[tagName.toLowerCase()] !== 'undefined') {
 			dev.warn("Custom tag: " + tagName.toLowerCase() + " is already defined");
 			return;
 		}
-		if (!automaticCustomElementCharacters.test(tagName) && tagName !== "content") {
+
+		if (!validCustomElementName && tagName !== "content") {
 			dev.warn("Custom tag: " + tagName.toLowerCase() + " hyphen missed");
 			return;
 		}
@@ -146,21 +149,23 @@ var tag = function (tagName, tagHandler) {
 		// automatically render elements that have tagHandlers
 		// If browser supports customElements, register the tag as a custom element
 		if ("customElements" in GLOBAL) {
-			var CustomElement = function() {
-				return Reflect.construct(HTMLElement, [], CustomElement);
-			};
+			if (validCustomElementName) {
+				var CustomElement = function() {
+					return Reflect.construct(HTMLElement, [], CustomElement);
+				};
 
-			CustomElement.prototype.connectedCallback = function() {
-				// don't re-render an element that has been rendered already
-				if (!renderedElements.has(this)) {
-					tagHandler(this, tagName, {});
-				}
-			};
+				CustomElement.prototype.connectedCallback = function() {
+					// don't re-render an element that has been rendered already
+					if (!renderedElements.has(this)) {
+						tagHandler(this, tagName, {});
+					}
+				};
 
-			Object.setPrototypeOf(CustomElement.prototype, HTMLElement.prototype);
-			Object.setPrototypeOf(CustomElement, HTMLElement);
+				Object.setPrototypeOf(CustomElement.prototype, HTMLElement.prototype);
+				Object.setPrototypeOf(CustomElement, HTMLElement);
 
-			customElements.define(tagName, CustomElement);
+				customElements.define(tagName, CustomElement);
+			}
 		}
 		// If browser doesn't support customElements, set up MutationObserver for
 		// rendering elements when they are inserted in the page
