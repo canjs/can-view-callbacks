@@ -124,12 +124,12 @@ var tag = function (tagName, tagHandler) {
 	if(tagHandler) {
 		var GLOBAL = getGlobal();
 
-		var validCustomElementName = automaticCustomElementCharacters.test(tagName);
+		var validCustomElementName = automaticCustomElementCharacters.test(tagName),
+			tagExists = typeof tags[tagName.toLowerCase()] !== 'undefined';
 
 		//!steal-remove-start
-		if (typeof tags[tagName.toLowerCase()] !== 'undefined') {
+		if (tagExists) {
 			dev.warn("Custom tag: " + tagName.toLowerCase() + " is already defined");
-			return;
 		}
 
 		if (!validCustomElementName && tagName !== "content") {
@@ -148,7 +148,7 @@ var tag = function (tagName, tagHandler) {
 		// automatically render elements that have tagHandlers
 		// If browser supports customElements, register the tag as a custom element
 		if ("customElements" in GLOBAL) {
-			if (validCustomElementName) {
+			if (validCustomElementName && !tagExists) {
 				var CustomElement = function() {
 					return Reflect.construct(HTMLElement, [], CustomElement);
 				};
@@ -156,7 +156,7 @@ var tag = function (tagName, tagHandler) {
 				CustomElement.prototype.connectedCallback = function() {
 					// don't re-render an element that has been rendered already
 					if (!renderedElements.has(this)) {
-						tagHandler(this, tagName, {});
+						tags[tagName.toLowerCase()](this, tagName, {});
 					}
 				};
 

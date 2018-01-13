@@ -325,10 +325,32 @@ QUnit.test("creating a tag for `content` should work", function() {
 	QUnit.stop();
 	afterMutation(function() {
 		QUnit.start();
-		var els = fixture.getElementsByTagName("content");
+		QUnit.equal(contentEl.innerHTML, "This is the content");
+	});
+});
 
-		for (var i=0; i<els.length; i++) {
-			QUnit.equal(els[i].innerHTML, "This is the content");
-		}
+QUnit.test("registering the same tag twice should work", function() {
+	var fixture = document.getElementById('qunit-fixture');
+
+	callbacks.tag("the-tag", function() {});
+
+	callbacks.tag("the-tag", function(el) {
+		var textNode = document.createTextNode("This is the the-tag");
+		el.appendChild(textNode);
+	});
+
+	ok(true, "did not throw error");
+
+	var theManuallyHandledTag = document.createElement("the-tag");
+	callbacks.tagHandler(theManuallyHandledTag, "the-tag", {});
+
+	var theAutomaticallyHandledTag = document.createElement("the-tag");
+	fixture.appendChild(theAutomaticallyHandledTag);
+
+	QUnit.stop();
+	afterMutation(function() {
+		QUnit.start();
+		QUnit.equal(theManuallyHandledTag.innerHTML, "This is the the-tag");
+		QUnit.equal(theAutomaticallyHandledTag.innerHTML, "This is the the-tag");
 	});
 });
