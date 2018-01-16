@@ -6,6 +6,7 @@ var domMutate = require('can-dom-mutate/node');
 var namespace = require('can-namespace');
 var nodeLists = require('can-view-nodelist');
 var makeFrag = require("can-util/dom/frag/frag");
+var globals = require('can-globals');
 
 //!steal-remove-start
 var requestedAttributes = {};
@@ -59,10 +60,13 @@ var enableMutationObserver = function() {
 		}
 	};
 
-	var obs = new MutationObserver(mutationHandler);
-	obs.observe(getGlobal().document.documentElement, { childList: true, subtree: true });
+	var MutationObserver = globals.getKeyValue("MutationObserver");
+	if(MutationObserver) {
+		var obs = new MutationObserver(mutationHandler);
+		obs.observe(getGlobal().document.documentElement, { childList: true, subtree: true });
 
-	mutationObserverEnabled = true;
+		mutationObserverEnabled = true;
+	}
 };
 
 var renderTagsInDocument = function(tagName) {
@@ -146,9 +150,11 @@ var tag = function (tagName, tagHandler) {
 
 		tags[tagName.toLowerCase()] = tagHandler;
 
+		var customElements = globals.getKeyValue("customElements");
+
 		// automatically render elements that have tagHandlers
 		// If browser supports customElements, register the tag as a custom element
-		if ("customElements" in GLOBAL) {
+		if (customElements) {
 			customElementExists = customElements.get(tagName.toLowerCase());
 
 			if (validCustomElementName && !customElementExists) {
@@ -234,7 +240,6 @@ var callbacks = {
 		// If the tagCallback gave us something to render with, and there is content within that element
 		// render it!
 		if (res && tagData.subtemplate) {
-
 			if (scope !== res) {
 				scope = scope.add(res);
 			}
