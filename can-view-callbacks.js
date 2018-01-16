@@ -125,7 +125,8 @@ var tag = function (tagName, tagHandler) {
 		var GLOBAL = getGlobal();
 
 		var validCustomElementName = automaticCustomElementCharacters.test(tagName),
-			tagExists = typeof tags[tagName.toLowerCase()] !== 'undefined';
+			tagExists = typeof tags[tagName.toLowerCase()] !== 'undefined',
+			customElementExists;
 
 		//!steal-remove-start
 		if (tagExists) {
@@ -148,7 +149,9 @@ var tag = function (tagName, tagHandler) {
 		// automatically render elements that have tagHandlers
 		// If browser supports customElements, register the tag as a custom element
 		if ("customElements" in GLOBAL) {
-			if (validCustomElementName && !tagExists) {
+			customElementExists = customElements.get(tagName.toLowerCase());
+
+			if (validCustomElementName && !customElementExists) {
 				var CustomElement = function() {
 					return Reflect.construct(HTMLElement, [], CustomElement);
 				};

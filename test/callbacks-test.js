@@ -354,3 +354,32 @@ QUnit.test("registering the same tag twice should work", function() {
 		QUnit.equal(theAutomaticallyHandledTag.innerHTML, "This is the the-tag");
 	});
 });
+
+QUnit.test("registering, deleting, registering again should work", function() {
+	var fixture = document.getElementById('qunit-fixture');
+
+	callbacks.tag("the-same-tag", function() {});
+
+	// remove the tag by passing null as the tagHandler
+	callbacks.tag("the-same-tag", null);
+
+	callbacks.tag("the-same-tag", function(el) {
+		var textNode = document.createTextNode("This is the the-same-tag");
+		el.appendChild(textNode);
+	});
+
+	ok(true, "did not throw error");
+
+	var theManuallyHandledTag = document.createElement("the-same-tag");
+	callbacks.tagHandler(theManuallyHandledTag, "the-same-tag", {});
+
+	var theAutomaticallyHandledTag = document.createElement("the-same-tag");
+	fixture.appendChild(theAutomaticallyHandledTag);
+
+	QUnit.stop();
+	afterMutation(function() {
+		QUnit.start();
+		QUnit.equal(theManuallyHandledTag.innerHTML, "This is the the-same-tag");
+		QUnit.equal(theAutomaticallyHandledTag.innerHTML, "This is the the-same-tag");
+	});
+});
