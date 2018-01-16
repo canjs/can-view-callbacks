@@ -400,6 +400,8 @@ QUnit.test("Works in environments without MutationObserver", function() {
 
 	QUnit.stop();
 	afterMutation(function(){
+		globals.setKeyValue("MutationObserver", oldMO);
+		globals.setKeyValue("customElements", oldCE);
 		QUnit.start();
 	});
 });
