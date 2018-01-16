@@ -383,3 +383,23 @@ QUnit.test("registering, deleting, registering again should work", function() {
 		QUnit.equal(theAutomaticallyHandledTag.innerHTML, "This is the the-same-tag");
 	});
 });
+
+QUnit.test("Works in environments without MutationObserver", function() {
+	var oldMO = globals.getKeyValue("MutationObserver");
+	var oldCE = globals.getKeyValue("customElements");
+	globals.setKeyValue("MutationObserver", null);
+	globals.setKeyValue("customElements", null);
+
+	var fixture = document.getElementById('qunit-fixture');
+	var autoHandled = document.createElement("no-mutation-observer");
+	fixture.appendChild(autoHandled);
+
+	callbacks.tag("no-mutation-observer", function() {
+		QUnit.ok(true, "tag was called");
+	});
+
+	QUnit.stop();
+	afterMutation(function(){
+		QUnit.start();
+	});
+});
