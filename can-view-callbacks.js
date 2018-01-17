@@ -16,6 +16,11 @@ var tags = {};
 
 // WeakSet containing elements that have been rendered already
 // and therefore do not need to be rendered again
+
+var automountEnabled = function(){
+	return globals.getKeyValue("document").documentElement.getAttribute("data-can-automount") !== "false";
+};
+
 var renderedElements = new WeakSet();
 
 var renderNodeAndChildren = function(node) {
@@ -38,6 +43,7 @@ var renderNodeAndChildren = function(node) {
 };
 
 var mutationObserverEnabled = false;
+var globalMutationObserver;
 var enableMutationObserver = function() {
 	if (mutationObserverEnabled) {
 		return;
@@ -62,8 +68,11 @@ var enableMutationObserver = function() {
 
 	var MutationObserver = globals.getKeyValue("MutationObserver");
 	if(MutationObserver) {
-		var obs = new MutationObserver(mutationHandler);
-		obs.observe(getGlobal().document.documentElement, { childList: true, subtree: true });
+		globalMutationObserver = new MutationObserver(mutationHandler);
+		globalMutationObserver.observe(getGlobal().document.documentElement, {
+			childList: true,
+			subtree: true
+		});
 
 		mutationObserverEnabled = true;
 	}
@@ -150,37 +159,41 @@ var tag = function (tagName, tagHandler) {
 
 		tags[tagName.toLowerCase()] = tagHandler;
 
-		var customElements = globals.getKeyValue("customElements");
+		if(automountEnabled()) {
+			var customElements = globals.getKeyValue("customElements");
 
-		// automatically render elements that have tagHandlers
-		// If browser supports customElements, register the tag as a custom element
-		if (customElements) {
-			customElementExists = customElements.get(tagName.toLowerCase());
+			// automatically render elements that have tagHandlers
+			// If browser supports customElements, register the tag as a custom element
+			if (customElements) {
+				customElementExists = customElements.get(tagName.toLowerCase());
 
-			if (validCustomElementName && !customElementExists) {
-				var CustomElement = function() {
-					return Reflect.construct(HTMLElement, [], CustomElement);
-				};
+				if (validCustomElementName && !customElementExists) {
+					var CustomElement = function() {
+						return Reflect.construct(HTMLElement, [], CustomElement);
+					};
 
-				CustomElement.prototype.connectedCallback = function() {
-					// don't re-render an element that has been rendered already
-					if (!renderedElements.has(this)) {
-						tags[tagName.toLowerCase()](this, tagName, {});
-					}
-				};
+					CustomElement.prototype.connectedCallback = function() {
+						// don't re-render an element that has been rendered already
+						if (!renderedElements.has(this)) {
+							tags[tagName.toLowerCase()](this, tagName, {});
+						}
+					};
 
-				Object.setPrototypeOf(CustomElement.prototype, HTMLElement.prototype);
-				Object.setPrototypeOf(CustomElement, HTMLElement);
+					Object.setPrototypeOf(CustomElement.prototype, HTMLElement.prototype);
+					Object.setPrototypeOf(CustomElement, HTMLElement);
 
-				customElements.define(tagName, CustomElement);
+					customElements.define(tagName, CustomElement);
+				}
 			}
-		}
-		// If browser doesn't support customElements, set up MutationObserver for
-		// rendering elements when they are inserted in the page
-		// and rendering elements that are already in the page
-		else {
-			enableMutationObserver();
-			renderTagsInDocument(tagName);
+			// If browser doesn't support customElements, set up MutationObserver for
+			// rendering elements when they are inserted in the page
+			// and rendering elements that are already in the page
+			else {
+				enableMutationObserver();
+				renderTagsInDocument(tagName);
+			}
+		} else if(mutationObserverEnabled) {
+			globalMutationObserver.disconnect();
 		}
 	} else {
 		var cb;
