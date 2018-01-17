@@ -409,3 +409,24 @@ QUnit.test("Works in environments without MutationObserver", function() {
 		QUnit.start();
 	});
 });
+
+QUnit.test("automounting doesn't happen if the data-can-automount flag is set to false", function() {
+	var fixture = document.getElementById('qunit-fixture');
+	document.documentElement.dataset.canAutomount = "false";
+
+	callbacks.tag("automount-false", function(el) {
+		var textNode = document.createTextNode("This is the automount-false");
+		el.appendChild(textNode);
+		ok(false, "this shouldn't have been mounted :(");
+	});
+
+	var theAutomaticallyHandledTag = document.createElement("automount-false");
+	fixture.appendChild(theAutomaticallyHandledTag);
+
+	QUnit.stop();
+	afterMutation(function() {
+		QUnit.equal(theAutomaticallyHandledTag.innerHTML, "");
+		delete document.documentElement.dataset.canAutomount;
+		QUnit.start();
+	});
+});
