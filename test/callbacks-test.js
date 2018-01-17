@@ -427,6 +427,7 @@ QUnit.test("automounting doesn't happen if the data-can-automount flag is set to
 	afterMutation(function() {
 		QUnit.equal(theAutomaticallyHandledTag.innerHTML, "");
 		delete document.documentElement.dataset.canAutomount;
+		fixture.innerHTML = "";
 		QUnit.start();
 	});
 });

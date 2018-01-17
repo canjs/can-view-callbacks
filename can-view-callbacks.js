@@ -43,6 +43,7 @@ var renderNodeAndChildren = function(node) {
 };
 
 var mutationObserverEnabled = false;
+var globalMutationObserver;
 var enableMutationObserver = function() {
 	if (mutationObserverEnabled) {
 		return;
@@ -67,8 +68,11 @@ var enableMutationObserver = function() {
 
 	var MutationObserver = globals.getKeyValue("MutationObserver");
 	if(MutationObserver) {
-		var obs = new MutationObserver(mutationHandler);
-		obs.observe(getGlobal().document.documentElement, { childList: true, subtree: true });
+		globalMutationObserver = new MutationObserver(mutationHandler);
+		globalMutationObserver.observe(getGlobal().document.documentElement, {
+			childList: true,
+			subtree: true
+		});
 
 		mutationObserverEnabled = true;
 	}
@@ -188,6 +192,8 @@ var tag = function (tagName, tagHandler) {
 				enableMutationObserver();
 				renderTagsInDocument(tagName);
 			}
+		} else if(mutationObserverEnabled) {
+			globalMutationObserver.disconnect();
 		}
 	} else {
 		var cb;
