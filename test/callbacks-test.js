@@ -334,7 +334,8 @@ QUnit.test("registering the same tag twice should work", function() {
 
 	callbacks.tag("the-tag", function() {});
 
-	callbacks.tag("the-tag", function(el) {
+	callbacks.tag("the-tag", function(el, tagData) {
+		QUnit.equal(typeof tagData, "object", "tagHandler is passed a tagData object");
 		var textNode = document.createTextNode("This is the the-tag");
 		el.appendChild(textNode);
 	});
@@ -363,7 +364,8 @@ QUnit.test("registering, deleting, registering again should work", function() {
 	// remove the tag by passing null as the tagHandler
 	callbacks.tag("the-same-tag", null);
 
-	callbacks.tag("the-same-tag", function(el) {
+	callbacks.tag("the-same-tag", function(el, tagData) {
+		QUnit.equal(typeof tagData, "object", "tagHandler is passed a tagData object");
 		var textNode = document.createTextNode("This is the the-same-tag");
 		el.appendChild(textNode);
 	});

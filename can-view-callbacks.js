@@ -31,7 +31,7 @@ var renderNodeAndChildren = function(node) {
 	// skip elements that already have a viewmodel or elements whose tags don't match a registered tag
 	// or elements that have already been rendered
 	if (tagHandler && !renderedElements.has(node)) {
-		tagHandler(node, tagName, {});
+		tagHandler(node, {});
 	}
 
 	if (node.getElementsByTagName) {
@@ -175,7 +175,7 @@ var tag = function (tagName, tagHandler) {
 					CustomElement.prototype.connectedCallback = function() {
 						// don't re-render an element that has been rendered already
 						if (!renderedElements.has(this)) {
-							tags[tagName.toLowerCase()](this, tagName, {});
+							tags[tagName.toLowerCase()](this, {});
 						}
 					};
 
