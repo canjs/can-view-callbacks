@@ -32,13 +32,13 @@
     "donejs"
   ],
   "dependencies": {
-    "can-dom-mutate": "<2.0.0",
-    "can-globals": "<2.0.0",
-    "can-log": "<2.0.0",
+    "can-dom-mutate": "^1.0.0",
+    "can-globals": "^1.0.0",
+    "can-log": "^1.0.0",
     "can-namespace": "1.0.0",
-    "can-observation-recorder": "<2.0.0",
+    "can-observation-recorder": "^1.0.0",
     "can-util": "^3.9.5",
-    "can-view-nodelist": "^4.0.0-pre.5"
+    "can-view-nodelist": "^4.0.0"
   },
   "devDependencies": {
     "can-test-helpers": "^1.0.1",
