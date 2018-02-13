@@ -129,11 +129,12 @@ domEvents.addEventListener.call( el, "removed", function onremove() {
 If content is found within a custom tag like:
 
 ```js
-var template = stache(
-  "<my-form>\
-     <input value="{{first}}"/>\
-     <input value="{{last}}"/>\
-   </my-form>");
+var template = stache(`
+  <my-form>
+     <input value="{{first}}"/>
+     <input value="{{last}}"/>
+   </my-form>
+`);
 ```
 
 A separate template function is compiled and passed

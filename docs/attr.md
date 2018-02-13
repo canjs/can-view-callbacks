@@ -75,6 +75,7 @@ might want to dynamically update the tooltip like:
 Where `deleteTooltip()` changes depending on how many users are selected:
 
 ```js
+{
 	deleteTooltip: function(){
 		var selectedCount = selected.length
 		if(selectedCount) {
@@ -83,6 +84,7 @@ Where `deleteTooltip()` changes depending on how many users are selected:
 			return "Select users to delete them.";
 		}
 	},
+}
 ```
 
 The [can-util/dom/events/attributes/attributes attributes] event can be used to listen to when
