@@ -18,11 +18,11 @@ Allows registering callback functions that will be called when tags and attribut
 This will style elements using the *blue-el* tag with a blue background.
 
 ```js
-var callbacks = require("can-view-callbacks");
+import callbacks from "can-view-callbacks";
 
-callbacks.tag("blue-el", function(el){
+callbacks.tag( "blue-el", function( el ) {
 	el.style.background = "blue";
-});
+} );
 ```
 
 ```html
@@ -34,13 +34,14 @@ callbacks.tag("blue-el", function(el){
 Similarly you can register a callback for an attribute. Here we are using a regular expression to match an attribute that starts with `foo-`:
 
 ```js
-callbacks.attr(/foo-[\w\.]+/, function(el, attrData){
+callbacks.attr( /foo-[\w\.]+/, function( el, attrData ) {
+
 	// Get the part after foo-
-	var attrValue = attrData.attributeName.substr(4);
+	const attrValue = attrData.attributeName.substr( 4 );
 
 	// Set it's content
 	el.textContent = attrValue;
-});
+} );
 ```
 
 So that:

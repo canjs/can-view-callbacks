@@ -11,30 +11,30 @@ in a template.
 Handlers must be registered before templates using them are parsed.
 
 ```js
-var canViewCallbacks = require("can-view-callbacks");
-var domEvents = require("can-util/dom/events/events");
+import canViewCallbacks from "can-view-callbacks";
+import domEvents from "can-util/dom/events/events";
 
-canViewCallbacks.attr("show-when", function(el, attrData){
-	var prop = el.getAttribute("show-when");
-	var compute = attrData.compute(prop);
+canViewCallbacks.attr( "show-when", function( el, attrData ) {
+	const prop = el.getAttribute( "show-when" );
+	const compute = attrData.compute( prop );
 
-	var showOrHide = function(){
-		var val = compute();
-		if(val) {
-			el.style.display = 'block';
+	const showOrHide = function() {
+		const val = compute();
+		if ( val ) {
+			el.style.display = "block";
 		} else {
-			el.style.display = 'hidden';
+			el.style.display = "hidden";
 		}
 	};
 
-	compute.on("change", showOrHide);
+	compute.on( "change", showOrHide );
 	showOrHide();
 
-	domEvents.addEventListener.call( el, "removed", function onremove(){
-		compute.off("change", showOrHide);
-		domEvents.removeEventListener.call("removed", onremove);
-	});
-});
+	domEvents.addEventListener.call( el, "removed", function onremove() {
+		compute.off( "change", showOrHide );
+		domEvents.removeEventListener.call( "removed", onremove );
+	} );
+} );
 ```
 
 
@@ -75,38 +75,43 @@ might want to dynamically update the tooltip like:
 Where `deleteTooltip()` changes depending on how many users are selected:
 
 ```js
-	deleteTooltip: function(){
-		var selectedCount = selected.length
-		if(selectedCount) {
-			return "Delete "+selectedCount+" users";
+{
+	deleteTooltip: function() {
+		const selectedCount = selected.length;
+		if ( selectedCount ) {
+			return "Delete " + selectedCount + " users";
 		} else {
 			return "Select users to delete them.";
 		}
-	},
+	}
+}
 ```
 
 The [can-util/dom/events/attributes/attributes attributes] event can be used to listen to when
 the tooltip attribute changes its value like:
 
 ```js
-canViewCallbacks.attr("tooltip", function( el, attrData ) {
+canViewCallbacks.attr( "tooltip", function( el, attrData ) {
+
 	// A helper that updates or sets up the tooltip
-	var updateTooltip = function(){
-		$(el).tooltip({
-			content: el.getAttribute("tooltip"),
+	const updateTooltip = function() {
+		$( el ).tooltip( {
+			content: el.getAttribute( "tooltip" ),
 			items: "[tooltip]"
-		})
-	}
+		} );
+	};
+
 	// When the tooltip attribute changes, update the tooltip
-	domEvents.addEventListener.call(el, "attributes", function(ev){
-		if(ev.attributeName === "tooltip") {
+	domEvents.addEventListener.call( el, "attributes", function( ev ) {
+		if ( ev.attributeName === "tooltip" ) {
 			updateTooltip();
 		}
-	});
+	} );
+
 	// Setup the tooltip
 	updateTooltip();
 
-});
+} );
 ```
 
 To see this behavior in the following demo, hover the mouse over the “Delete”
@@ -134,7 +139,7 @@ __toggle__ and __fade-in-when__ will need the value of `showing` in:
 These values can be read from [can-view-callbacks.attrData]’s scope like:
 
 ```js
-attrData.scope.attr("showing")
+attrData.scope.attr( "showing" );
 ```
 
 But often, you want to update scope value or listen when the scope value
@@ -145,52 +150,52 @@ using [can-view-scope::compute compute] to get a get/set compute that is
 tied to the value in the scope:
 
 ```js
-var showing = attrData.scope.compute("showing")
+const showing = attrData.scope.compute( "showing" );
 ```
 
 This value can be written to by `toggle`:
 
 ```js
-canViewCallbacks.attr("toggle", function(el, attrData) {
-	var attrValue = el.getAttribute("toggle");
-	var toggleCompute = attrData.scope.compute(attrValue);
+canViewCallbacks.attr( "toggle", function( el, attrData ) {
+	const attrValue = el.getAttribute( "toggle" );
+	const toggleCompute = attrData.scope.compute( attrValue );
 
-	$(el).click(function() {
-		toggleCompute( ! toggleCompute() );
-	});
-});
+	$( el ).click( function() {
+		toggleCompute( !toggleCompute() );
+	} );
+} );
 ```
 
 Or listened to by `fade-in-when`:
 
 ```js
-canViewCallbacks.attr("fade-in-when", function(el, attrData) {
-	var attrValue = el.getAttribute("fade-in-when");
-	var fadeInCompute = attrData.scope.compute(attrValue);
+canViewCallbacks.attr( "fade-in-when", function( el, attrData ) {
+	const attrValue = el.getAttribute( "fade-in-when" );
+	const fadeInCompute = attrData.scope.compute( attrValue );
 
 	// handler for when the observable changes
-	var handler = function(event, newVal, oldVal) {
-		if (newVal && !oldVal) {
-			$(el).fadeIn("slow")
-		} else if (!newVal) {
-			$(el).hide()
+	const handler = function( event, newVal, oldVal ) {
+		if ( newVal && !oldVal ) {
+			$( el ).fadeIn( "slow" );
+		} else if ( !newVal ) {
+			$( el ).hide();
 		}
 	};
 
-	fadeInCompute.on("change", handler);
+	fadeInCompute.on( "change", handler );
 
-	...
+	// ...
 
-});
+} );
 ```
 
 When you listen to something other than the attribute’s element, remember to
 unbind the event handler when the element is [can-util/dom/events/removed/removed removed] from the page:
 
 ```js
-	domEvents.addEventListener.call(el, "removed", function() {
-		fadeInCompute.off("change", handler);
-	});
+domEvents.addEventListener.call( el, "removed", function() {
+	fadeInCompute.off( "change", handler );
+} );
 ```
 
 @demo demos/can-view-callbacks/fade_in_when.html
@@ -203,8 +208,10 @@ be called before the template is loaded, not simply before it is rendered.
 
 ```js
 //Call canViewCallbacks.attr first
-canViewCallbacks.attr('tooltip', tooltipFunction);
+canViewCallbacks.attr( "tooltip", tooltipFunction );
+
 //Preload a template for rendering
-var renderer = stache("<div tooltip='Hi There'>...</div>");
+const renderer = stache( "<div tooltip='Hi There'>...</div>" );
+
 //No calls to canViewCallbacks.attr after this will be used by `renderer`
 ```

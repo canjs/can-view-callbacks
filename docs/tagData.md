@@ -9,11 +9,11 @@ The data passed to [can-view-callbacks.tag].
   the content can be rendered with sub-template.  For example:
 
   ```js
-  callbacks.tag("foo-bar", function(el, tagData) {
-    var frag = tagData.subtemplate(tagData.scope, tagData.options);
-    $(el).html(frag);
-  });
-  ```
+callbacks.tag( "foo-bar", function( el, tagData ) {
+	const frag = tagData.subtemplate( tagData.scope, tagData.options );
+	$( el ).html( frag );
+} );
+```
 
   @option {can-view-scope} scope The scope of the element.  
 

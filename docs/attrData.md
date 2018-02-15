@@ -6,19 +6,19 @@ The data provided to [can-view-callbacks.attr].
 @type {Object}
 
   ```js
-  var canViewCallbacks = require("can-view-callbacks");
-  var stache = require("can-stache");
+import canViewCallbacks from "can-view-callbacks";
+import stache from "can-stache";
 
-  canViewCallbacks.attr("my-attr", function(el, attrData){
-    attrData.scope.peek("value") //-> 123
-	attrData.attributeName       //-> "my-attr"
+canViewCallbacks.attr( "my-attr", function( el, attrData ) {
+	attrData.scope.peek( "value" ); //-> 123
+	attrData.attributeName;       //-> "my-attr"
 
-  });
+} );
 
-  stache("<div my-attr='value'/>")({
-	  value: 123
-  });
-  ```
+stache( "<div my-attr='value'/>" )( {
+	value: 123
+} );
+```
 
   @option {can-view-scope} scope The scope of the element.
 
