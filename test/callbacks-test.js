@@ -107,16 +107,16 @@ testHelpers.devOnlyTest("should warn if attr callback defined after attr request
 	equal(teardown(), 1, "got warning");
 });
 
-testHelpers.devOnlyTest("should warn if RegExp attr callback defined after attr requested (#57)", function () {
+testHelpers.devOnlyTest("should warn if RegExp attr callback defined after attr requested (#57, #84)", function () {
 	var attrName = "masonry-wall";
 	var attrMatch = /masonry[- ]?wall/;
-	var teardown = testHelpers.willWarn("can-view-callbacks: " + attrName+ " custom attribute behavior requested before it was defined.  Make sure "+attrMatch.toString()+" is defined before it is needed.");
+	var teardown = testHelpers.willWarn("can-view-callbacks: " + attrName+ " custom attribute behavior requested before it was defined.  Make sure "+attrName+" is defined before it is needed.");
 
 	// calback attr requested
 	callbacks.attr(attrName);
 
 	// callback attr provided
-	callbacks.attr(attrMatch, function(){});
+	callbacks.attr(attrMatch, function() {});
 
 	equal(teardown(), 1, "got warning");
 });
