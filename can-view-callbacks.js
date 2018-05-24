@@ -5,7 +5,7 @@ var getGlobal = require('can-globals/global/global');
 var domMutate = require('can-dom-mutate/node');
 var namespace = require('can-namespace');
 var nodeLists = require('can-view-nodelist');
-var makeFrag = require("can-util/dom/frag/frag");
+var makeFrag = require("can-fragment");
 var globals = require('can-globals');
 
 //!steal-remove-start

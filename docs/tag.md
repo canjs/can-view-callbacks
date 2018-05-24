@@ -115,7 +115,7 @@ template( settings );
 ```
 
 If you listen on something outside the tag, it’s a good practice to stop listening
-when the element is [can-util/dom/events/removed/removed removed] from the page:
+when the element is [can-dom-mutate/events/events removed] from the page:
 
 ```js
 domEvents.addEventListener.call( el, "removed", function onremove() {

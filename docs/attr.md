@@ -12,7 +12,7 @@ Handlers must be registered before templates using them are parsed.
 
 ```js
 import canViewCallbacks from "can-view-callbacks";
-import domEvents from "can-util/dom/events/events";
+import domEvents from "can-dom-events";
 
 canViewCallbacks.attr( "show-when", function( el, attrData ) {
 	const prop = el.getAttribute( "show-when" );
@@ -87,10 +87,14 @@ Where `deleteTooltip()` changes depending on how many users are selected:
 }
 ```
 
-The [can-util/dom/events/attributes/attributes attributes] event can be used to listen to when
+The [can-dom-mutate/events/events attributes] event can be used to listen to when
 the tooltip attribute changes its value like:
 
 ```js
+var domMutateEvents = require("can-dom-mutate/events/events");
+domEvents.addEvent(domMutateEvents.attributes);
+
+
 canViewCallbacks.attr( "tooltip", function( el, attrData ) {
 
 	// A helper that updates or sets up the tooltip
@@ -102,7 +106,7 @@ canViewCallbacks.attr( "tooltip", function( el, attrData ) {
 	};
 
 	// When the tooltip attribute changes, update the tooltip
-	domEvents.addEventListener.call( el, "attributes", function( ev ) {
+	domEvents.addEventListener( el, "attributes", function( ev ) {
 		if ( ev.attributeName === "tooltip" ) {
 			updateTooltip();
 		}
@@ -190,7 +194,7 @@ canViewCallbacks.attr( "fade-in-when", function( el, attrData ) {
 ```
 
 When you listen to something other than the attribute’s element, remember to
-unbind the event handler when the element is [can-util/dom/events/removed/removed removed] from the page:
+unbind the event handler when the element is [can-dom-mutate/events/events removed] from the page:
 
 ```js
 domEvents.addEventListener.call( el, "removed", function() {
