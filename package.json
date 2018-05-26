@@ -33,7 +33,7 @@
   ],
   "dependencies": {
     "can-dom-mutate": "^1.0.0",
-    "can-fragment": "^1.0.0",
+    "can-fragment": "1.0.0",
     "can-globals": "^1.0.0",
     "can-log": "^1.0.0",
     "can-namespace": "1.0.0",
