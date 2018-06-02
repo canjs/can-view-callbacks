@@ -104,7 +104,7 @@ var attr = function (attributeName, attrHandler) {
 			//!steal-remove-start
 			Object.keys(requestedAttributes).forEach(function(requested){
 				if(attributeName.test(requested)) {
-					dev.warn("can-view-callbacks: " + requested+ " custom attribute behavior requested before it was defined.  Make sure "+attributeName+" is defined before it is needed.");
+					dev.warn("can-view-callbacks: " + requested+ " custom attribute behavior requested before it was defined.  Make sure "+requested+" is defined before it is needed.");
 				}
 			});
 			//!steal-remove-end
