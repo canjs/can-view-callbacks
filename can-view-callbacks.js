@@ -172,15 +172,14 @@ var tag = function (tagName, tagHandler) {
 						return Reflect.construct(HTMLElement, [], CustomElement);
 					};
 
+					CustomElement.prototype = Object.create(HTMLElement.prototype);
+
 					CustomElement.prototype.connectedCallback = function() {
 						// don't re-render an element that has been rendered already
 						if (!renderedElements.has(this)) {
 							tags[tagName.toLowerCase()](this, {});
 						}
 					};
-
-					Object.setPrototypeOf(CustomElement.prototype, HTMLElement.prototype);
-					Object.setPrototypeOf(CustomElement, HTMLElement);
 
 					customElements.define(tagName, CustomElement);
 				}
