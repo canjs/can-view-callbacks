@@ -9,7 +9,9 @@ var makeFrag = require("can-fragment");
 var globals = require('can-globals');
 
 //!steal-remove-start
-var requestedAttributes = {};
+if (process.env.NODE_ENV !== 'production') {
+	var requestedAttributes = {};
+}
 //!steal-remove-end
 
 var tags = {};
@@ -91,8 +93,10 @@ var attr = function (attributeName, attrHandler) {
 		if (typeof attributeName === "string") {
 			attributes[attributeName] = attrHandler;
 			//!steal-remove-start
-			if(requestedAttributes[attributeName]) {
-				dev.warn("can-view-callbacks: " + attributeName+ " custom attribute behavior requested before it was defined.  Make sure "+attributeName+" is defined before it is needed.");
+			if (process.env.NODE_ENV !== 'production') {
+				if(requestedAttributes[attributeName]) {
+					dev.warn("can-view-callbacks: " + attributeName+ " custom attribute behavior requested before it was defined.  Make sure "+attributeName+" is defined before it is needed.");
+				}
 			}
 			//!steal-remove-end
 		} else {
@@ -102,11 +106,13 @@ var attr = function (attributeName, attrHandler) {
 			});
 
 			//!steal-remove-start
-			Object.keys(requestedAttributes).forEach(function(requested){
-				if(attributeName.test(requested)) {
-					dev.warn("can-view-callbacks: " + requested+ " custom attribute behavior requested before it was defined.  Make sure "+requested+" is defined before it is needed.");
-				}
-			});
+			if (process.env.NODE_ENV !== 'production') {
+				Object.keys(requestedAttributes).forEach(function(requested){
+					if(attributeName.test(requested)) {
+						dev.warn("can-view-callbacks: " + requested+ " custom attribute behavior requested before it was defined.  Make sure "+requested+" is defined before it is needed.");
+					}
+				});
+			}
 			//!steal-remove-end
 		}
 	} else {
@@ -121,7 +127,9 @@ var attr = function (attributeName, attrHandler) {
 			}
 		}
 		//!steal-remove-start
-		requestedAttributes[attributeName] = true;
+		if (process.env.NODE_ENV !== 'production') {
+			requestedAttributes[attributeName] = true;
+		}
 		//!steal-remove-end
 
 		return cb;
@@ -142,12 +150,14 @@ var tag = function (tagName, tagHandler) {
 			customElementExists;
 
 		//!steal-remove-start
-		if (tagExists) {
-			dev.warn("Custom tag: " + tagName.toLowerCase() + " is already defined");
-		}
+		if (process.env.NODE_ENV !== 'production') {
+			if (tagExists) {
+				dev.warn("Custom tag: " + tagName.toLowerCase() + " is already defined");
+			}
 
-		if (!validCustomElementName && tagName !== "content") {
-			dev.warn("Custom tag: " + tagName.toLowerCase() + " hyphen missed");
+			if (!validCustomElementName && tagName !== "content") {
+				dev.warn("Custom tag: " + tagName.toLowerCase() + " hyphen missed");
+			}
 		}
 		//!steal-remove-end
 
@@ -239,12 +249,14 @@ var callbacks = {
 		}
 
 		//!steal-remove-start
-		if (!tagCallback) {
-			var GLOBAL = getGlobal();
-			var ceConstructor = GLOBAL.document.createElement(tagName).constructor;
-			// If not registered as a custom element, the browser will use default constructors
-			if (ceConstructor === GLOBAL.HTMLElement || ceConstructor === GLOBAL.HTMLUnknownElement) {
-				dev.warn('can-view-callbacks: No custom element found for ' + tagName);
+		if (process.env.NODE_ENV !== 'production') {
+			if (!tagCallback) {
+				var GLOBAL = getGlobal();
+				var ceConstructor = GLOBAL.document.createElement(tagName).constructor;
+				// If not registered as a custom element, the browser will use default constructors
+				if (ceConstructor === GLOBAL.HTMLElement || ceConstructor === GLOBAL.HTMLUnknownElement) {
+					dev.warn('can-view-callbacks: No custom element found for ' + tagName);
+				}
 			}
 		}
 		//!steal-remove-end
