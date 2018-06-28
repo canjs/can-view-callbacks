@@ -27,7 +27,7 @@ var automountEnabled = function(){
 	return globals.getKeyValue("document").documentElement.getAttribute("data-can-automount") !== "false";
 };
 
-var renderedElements = new WeakSet();
+var renderedElements = new WeakMap();
 
 var renderNodeAndChildren = function(node) {
 	var tagName = node.tagName && node.tagName.toLowerCase();
@@ -154,7 +154,7 @@ var attrs = function(attrMap) {
 	canReflect.eachKey(map, function(callback, exp){
 		attr(exp, callback);
 	});
-}
+};
 
 var attributes = {},
 	regExpAttributes = [],
@@ -265,7 +265,7 @@ var callbacks = {
 
 			// add the element to the Set of elements that have had their handlers called
 			// this will prevent the handler from being called again when the element is inserted
-			renderedElements.add(el);
+			renderedElements.set(el, true);
 		} else {
 			res = scope;
 		}

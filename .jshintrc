@@ -24,7 +24,8 @@
 		"Promise": true,
 		"customElements": true,
 		"Reflect": true,
-		"WeakSet": true
+		"WeakSet": true,
+		"WeakMap": true
 	},
 	"strict": false,
 	"curly": true,
