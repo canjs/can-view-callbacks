@@ -2,6 +2,7 @@ var QUnit = require('steal-qunit');
 var callbacks = require('can-view-callbacks');
 var nodeLists = require('can-view-nodelist');
 var can = require('can-namespace');
+var canSymbol = require('can-symbol');
 var clone = require('steal-clone');
 var testHelpers = require("can-test-helpers/lib/dev");
 var Scope = require("can-view-scope");
@@ -432,4 +433,60 @@ QUnit.test("automounting doesn't happen if the data-can-automount flag is set to
 		fixture.innerHTML = "";
 		QUnit.start();
 	});
+});
+
+
+QUnit.test("attrs takes a Map of attr callbacks", function(){
+	var doc = globals.getKeyValue('document');
+	var map = new Map();
+	map.set("foo", function(el, attrData) {
+		el.appendChild(doc.createTextNode("foo"));
+	});
+	map.set(/bar/, function(el, attrData) {
+		el.appendChild(doc.createTextNode("bar"));
+	});
+
+	callbacks.attrs(map);
+
+	var el1 = doc.createElement("span");
+	el1.setAttribute("foo", "");
+
+	var el2 = doc.createElement("span");
+	el2.setAttribute("bar", "");
+
+	callbacks.attr("foo")(el1);
+	callbacks.attr("bar")(el2);
+
+	QUnit.equal(el1.firstChild.nodeValue, "foo");
+	QUnit.equal(el2.firstChild.nodeValue, "bar");
+});
+
+QUnit.test("attrs will use can.callbackMap symbol if available.", function(){
+	var doc = globals.getKeyValue('document');
+	var map = new Map();
+	map.set("foo2", function(el, attrData) {
+		el.appendChild(doc.createTextNode("foo"));
+	});
+	map.set(/bar2/, function(el, attrData) {
+		el.appendChild(doc.createTextNode("bar"));
+	});
+
+	var bindings = {
+		bindings: map
+	};
+	bindings[canSymbol.for("can.callbackMap")] = map;
+	callbacks.attrs(bindings);
+
+	var el1 = doc.createElement("span");
+	el1.setAttribute("foo2", "");
+
+	var el2 = doc.createElement("span");
+	el2.setAttribute("bar2", "");
+
+
+	callbacks.attr("foo2")(el1);
+	callbacks.attr("bar2")(el2);
+
+	QUnit.equal(el1.firstChild.nodeValue, "foo");
+	QUnit.equal(el2.firstChild.nodeValue, "bar");
 });
