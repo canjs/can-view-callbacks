@@ -7,6 +7,10 @@ var namespace = require('can-namespace');
 var nodeLists = require('can-view-nodelist');
 var makeFrag = require("can-fragment");
 var globals = require('can-globals');
+var canSymbol = require('can-symbol');
+var canReflect = require('can-reflect');
+
+var callbackMapSymbol = canSymbol.for('can.callbackMap');
 
 //!steal-remove-start
 if (process.env.NODE_ENV !== 'production') {
@@ -136,8 +140,25 @@ var attr = function (attributeName, attrHandler) {
 	}
 };
 
+var attrs = function(attrMap) {
+	var map = canReflect.getKeyValue(attrMap, callbackMapSymbol) || attrMap;
+
+	// Only add bindings once.
+	if(attrMaps.has(map)) {
+		return;
+	} else {
+		// Would prefer to use WeakSet but IE11 doesn't support it.
+		attrMaps.set(map, true);
+	}
+
+	canReflect.eachKey(map, function(callback, exp){
+		attr(exp, callback);
+	});
+}
+
 var attributes = {},
 	regExpAttributes = [],
+	attrMaps = new WeakMap(),
 	automaticCustomElementCharacters = /[-\:]/;
 var defaultCallback = function () {};
 
@@ -230,6 +251,7 @@ var callbacks = {
 	defaultCallback: defaultCallback,
 	tag: tag,
 	attr: attr,
+	attrs: attrs,
 	// handles calling back a tag callback
 	tagHandler: function(el, tagName, tagData){
 		var scope = tagData.scope,
