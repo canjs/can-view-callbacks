@@ -1,3 +1,4 @@
+"use strict";
 var ObservationRecorder = require('can-observation-recorder');
 
 var dev = require('can-log/dev/dev');
