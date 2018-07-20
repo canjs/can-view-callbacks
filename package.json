@@ -38,7 +38,7 @@
     "can-log": "^1.0.0",
     "can-namespace": "1.0.0",
     "can-observation-recorder": "^1.0.0",
-    "can-reflect": "^1.16.7",
+    "can-reflect": "^1.17.1",
     "can-symbol": "^1.6.1",
     "can-view-nodelist": "^4.0.0"
   },
