@@ -490,3 +490,22 @@ QUnit.test("attrs will use can.callbackMap symbol if available.", function(){
 	QUnit.equal(el1.firstChild.nodeValue, "foo");
 	QUnit.equal(el2.firstChild.nodeValue, "bar");
 });
+
+QUnit.test("Prevent throwing when there is no documentElement in tag() #100", function() {
+	var realDoc = globals.getKeyValue("document");
+	var newDoc = realDoc.implementation.createHTMLDocument('test');
+	globals.setKeyValue("document", newDoc);
+
+	// Destroy the documentElement
+	newDoc.removeChild(newDoc.documentElement);
+
+	try {
+		callbacks.tag("please-dont-blow-up", function(){});
+		QUnit.ok(true, "it worked");
+	} catch(err) {
+		QUnit.ok(false, err);
+	} finally {
+		globals.setKeyValue("document", realDoc);
+	}
+
+});

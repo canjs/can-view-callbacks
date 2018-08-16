@@ -24,7 +24,11 @@ var tags = {};
 // and therefore do not need to be rendered again
 
 var automountEnabled = function(){
-	return globals.getKeyValue("document").documentElement.getAttribute("data-can-automount") !== "false";
+	var document = globals.getKeyValue("document");
+	if(document == null || document.documentElement == null) {
+		return false;
+	}
+	return document.documentElement.getAttribute("data-can-automount") !== "false";
 };
 
 var renderedElements = new WeakMap();
