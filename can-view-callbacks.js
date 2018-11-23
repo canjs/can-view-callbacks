@@ -34,16 +34,20 @@ var automountEnabled = function(){
 
 var renderedElements = new WeakMap();
 
-var renderNodeAndChildren = function(node) {
+var mountElement = function (node) {
 	var tagName = node.tagName && node.tagName.toLowerCase();
 	var tagHandler = tags[tagName];
-	var children;
 
 	// skip elements that already have a viewmodel or elements whose tags don't match a registered tag
 	// or elements that have already been rendered
 	if (tagHandler && !renderedElements.has(node)) {
 		tagHandler(node, {});
 	}
+};
+
+var renderNodeAndChildren = function(node) {
+	var children;
+	mountElement(node);
 
 	if (node.getElementsByTagName) {
 		children = node.getElementsByTagName("*");
@@ -93,7 +97,7 @@ var renderTagsInDocument = function(tagName) {
 	var nodes = getGlobal().document.getElementsByTagName(tagName);
 
 	for (var i=0, node; (node = nodes[i]) !== undefined; i++) {
-		renderNodeAndChildren(node);
+		mountElement(node);
 	}
 };
 
