@@ -512,23 +512,24 @@ QUnit.test("Prevent throwing when there is no documentElement in tag() #100", fu
 
 QUnit.test("Edge prevent double insert", function () {
 	var fixture = document.getElementById('qunit-fixture');
-
-	var outerEl = document.createElement("edge-double-insert-outer");
-	var innerEl = document.createElement("edge-double-insert-inner");
-
-	outerEl.appendChild(innerEl);
-	fixture.appendChild(outerEl);
+	var innerElCounter = 0, outerElCounter = 0;
 
 	callbacks.tag("edge-double-insert-inner", function(el) {
-		el.innerHTML = "the edge-double-insert-inner element";
+		innerElCounter++;
 	});
 
-	callbacks.tag("edge-double-insert-outer", function() {});
+	fixture.innerHTML = "<edge-double-insert-outer></edge-double-insert-outer>";
+
+	callbacks.tag("edge-double-insert-outer", function(el) {
+		outerElCounter++;
+		el.innerHTML = "<edge-double-insert-inner></edge-double-insert-inner>";
+		callbacks.tagHandler(el.firstChild, "edge-double-insert-inner", {});
+	});
 
 	QUnit.stop();
 	afterMutation(function() {
-		QUnit.equal(innerEl.innerHTML, "the edge-double-insert-inner element");
-		fixture.innerHTML = "";
+		QUnit.equal(innerElCounter, 1, "inner called once");
+		QUnit.equal(outerElCounter, 1, "outer called once");
 		QUnit.start();
 	});
 });

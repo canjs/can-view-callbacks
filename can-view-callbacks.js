@@ -40,8 +40,8 @@ var mountElement = function (node) {
 
 	// skip elements that already have a viewmodel or elements whose tags don't match a registered tag
 	// or elements that have already been rendered
-	if (tagHandler && !renderedElements.has(node)) {
-		tagHandler(node, {});
+	if (tagHandler) {
+		callbacks.tagHandler(node, tagName, {});
 	}
 };
 
@@ -72,10 +72,7 @@ var enableMutationObserver = function() {
 				addedNodes = mutation.addedNodes;
 
 				for (var j=0, addedNode; (addedNode = addedNodes[j]) !== undefined; j++) {
-					// skip elements that have already been rendered
-					if (!renderedElements.has(addedNode)) {
-						renderNodeAndChildren(addedNode);
-					}
+					renderNodeAndChildren(addedNode);
 				}
 			}
 		}
@@ -215,10 +212,7 @@ var tag = function (tagName, tagHandler) {
 					CustomElement.prototype = Object.create(HTMLElement.prototype);
 
 					CustomElement.prototype.connectedCallback = function() {
-						// don't re-render an element that has been rendered already
-						if (!renderedElements.has(this)) {
-							tags[tagName.toLowerCase()](this, {});
-						}
+						callbacks.tagHandler(this, tagName.toLowerCase(), {});
 					};
 
 					customElements.define(tagName, CustomElement);
@@ -263,6 +257,11 @@ var callbacks = {
 	attrs: attrs,
 	// handles calling back a tag callback
 	tagHandler: function(el, tagName, tagData){
+		// skip elements that have already been rendered
+		if (renderedElements.has(el)) {
+			return;
+		}
+
 		var scope = tagData.scope,
 			helperTagCallback = scope && scope.templateContext.tags.get(tagName),
 			tagCallback = helperTagCallback || tags[tagName],
@@ -270,11 +269,11 @@ var callbacks = {
 
 		// If this was an element like <foo-bar> that doesn't have a component, just render its content
 		if(tagCallback) {
-			res = ObservationRecorder.ignore(tagCallback)(el, tagData);
-
 			// add the element to the Set of elements that have had their handlers called
 			// this will prevent the handler from being called again when the element is inserted
 			renderedElements.set(el, true);
+
+			res = ObservationRecorder.ignore(tagCallback)(el, tagData);
 		} else {
 			res = scope;
 		}
