@@ -1,6 +1,6 @@
 {
   "name": "can-view-callbacks",
-  "version": "4.3.1",
+  "version": "4.3.2",
   "description": "Registered callbacks for behaviors",
   "homepage": "https://canjs.com/doc/can-view-callbacks.html",
   "repository": {
