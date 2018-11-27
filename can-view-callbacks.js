@@ -269,11 +269,11 @@ var callbacks = {
 
 		// If this was an element like <foo-bar> that doesn't have a component, just render its content
 		if(tagCallback) {
+			res = ObservationRecorder.ignore(tagCallback)(el, tagData);
+			
 			// add the element to the Set of elements that have had their handlers called
 			// this will prevent the handler from being called again when the element is inserted
 			renderedElements.set(el, true);
-
-			res = ObservationRecorder.ignore(tagCallback)(el, tagData);
 		} else {
 			res = scope;
 		}
