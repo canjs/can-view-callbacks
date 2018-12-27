@@ -510,6 +510,30 @@ QUnit.test("Prevent throwing when there is no documentElement in tag() #100", fu
 
 });
 
+QUnit.test("Renders to the correct document", function() {
+	var realGlobal = globals.getKeyValue("global");
+	var newGlobal = {};
+	globals.setKeyValue("global", newGlobal);
+	globals.deleteKeyValue("customElements");
+
+	var newDoc = document.implementation.createHTMLDocument("Testing");
+	newDoc.body.appendChild(newDoc.createElement("tag-in-this-doc"));
+	globals.setKeyValue("document", newDoc);
+
+	try {
+		callbacks.tag("tag-in-this-doc", function(el) {
+			var txt = newDoc.createTextNode("works");
+			el.appendChild(txt);
+		});
+	} catch(e) {}
+	finally {
+		QUnit.equal(newDoc.body.firstChild.firstChild.nodeValue, "works", "Updated the correct document");
+
+		globals.setKeyValue("global", realGlobal);
+		globals.setKeyValue("document", realGlobal.document);
+	}
+});
+
 QUnit.test("Edge prevent double insert", function () {
 	var fixture = document.getElementById('qunit-fixture');
 	var innerElCounter = 0, outerElCounter = 0;
