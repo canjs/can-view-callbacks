@@ -3,6 +3,7 @@ var ObservationRecorder = require('can-observation-recorder');
 
 var dev = require('can-log/dev/dev');
 var getGlobal = require('can-globals/global/global');
+var getDocument = require('can-globals/document/document');
 var domMutate = require('can-dom-mutate/node');
 var namespace = require('can-namespace');
 var nodeLists = require('can-view-nodelist');
@@ -81,7 +82,7 @@ var enableMutationObserver = function() {
 	var MutationObserver = globals.getKeyValue("MutationObserver");
 	if(MutationObserver) {
 		globalMutationObserver = new MutationObserver(mutationHandler);
-		globalMutationObserver.observe(getGlobal().document.documentElement, {
+		globalMutationObserver.observe(getDocument().documentElement, {
 			childList: true,
 			subtree: true
 		});
@@ -91,7 +92,7 @@ var enableMutationObserver = function() {
 };
 
 var renderTagsInDocument = function(tagName) {
-	var nodes = getGlobal().document.getElementsByTagName(tagName);
+	var nodes = getDocument().getElementsByTagName(tagName);
 
 	for (var i=0, node; (node = nodes[i]) !== undefined; i++) {
 		mountElement(node);
@@ -270,7 +271,7 @@ var callbacks = {
 		// If this was an element like <foo-bar> that doesn't have a component, just render its content
 		if(tagCallback) {
 			res = ObservationRecorder.ignore(tagCallback)(el, tagData);
-			
+
 			// add the element to the Set of elements that have had their handlers called
 			// this will prevent the handler from being called again when the element is inserted
 			renderedElements.set(el, true);
@@ -282,7 +283,7 @@ var callbacks = {
 		if (process.env.NODE_ENV !== 'production') {
 			if (!tagCallback) {
 				var GLOBAL = getGlobal();
-				var ceConstructor = GLOBAL.document.createElement(tagName).constructor;
+				var ceConstructor = getDocument().createElement(tagName).constructor;
 				// If not registered as a custom element, the browser will use default constructors
 				if (ceConstructor === GLOBAL.HTMLElement || ceConstructor === GLOBAL.HTMLUnknownElement) {
 					dev.warn('can-view-callbacks: No custom element found for ' + tagName);
