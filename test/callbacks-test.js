@@ -20,7 +20,12 @@ function afterMutation(cb) {
 	domMutateNode.appendChild.call(doc.body, div);
 }
 
-QUnit.module('can-view-callbacks');
+QUnit.module('can-view-callbacks', {
+	beforeEach: function() {
+		// reset tags to prevent conflicts between tests
+		callbacks._tags = {};
+	}
+});
 
 QUnit.test('Initialized the plugin', function(){
   var handler = function(){
