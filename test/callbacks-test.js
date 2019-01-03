@@ -20,12 +20,7 @@ function afterMutation(cb) {
 	domMutateNode.appendChild.call(doc.body, div);
 }
 
-QUnit.module('can-view-callbacks', {
-	beforeEach: function() {
-		// reset tags to prevent conflicts between tests
-		callbacks._tags = {};
-	}
-});
+QUnit.module('can-view-callbacks');
 
 QUnit.test('Initialized the plugin', function(){
   var handler = function(){
@@ -570,17 +565,17 @@ QUnit.test("MutationObserver mounts each element once in browsers that do not su
 	var fixture = doc.getElementById('qunit-fixture');
 	var innerElCounter = 0, outerElCounter = 0;
 
-	callbacks.tag("inner-el", function(el) {});
-	callbacks.tag("outer-el", function(el) {
-		var inner = doc.createElement("inner-el");
+	callbacks.tag("mount-once-inner", function(el) {});
+	callbacks.tag("mount-once-outer", function(el) {
+		var inner = doc.createElement("mount-once-inner");
 		el.appendChild(inner);
 	});
 
 	var origTagHandler = callbacks.tagHandler;
 	callbacks.tagHandler = function(el, tagName) {
-		if (tagName === "inner-el") {
+		if (tagName === "mount-once-inner") {
 			innerElCounter++;
-		} else if (tagName === "outer-el") {
+		} else if (tagName === "mount-once-outer") {
 			outerElCounter++;
 		}
 		origTagHandler.apply(this, arguments);
@@ -597,6 +592,6 @@ QUnit.test("MutationObserver mounts each element once in browsers that do not su
 		QUnit.start();
 	});
 
-	var outer = doc.createElement("outer-el");
+	var outer = doc.createElement("mount-once-outer");
 	fixture.appendChild(outer);
 });
