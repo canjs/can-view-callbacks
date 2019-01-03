@@ -435,7 +435,6 @@ QUnit.test("automounting doesn't happen if the data-can-automount flag is set to
 	});
 });
 
-
 QUnit.test("attrs takes a Map of attr callbacks", function(){
 	var doc = globals.getKeyValue('document');
 	var map = new Map();
@@ -556,4 +555,43 @@ QUnit.test("Edge prevent double insert", function () {
 		QUnit.equal(outerElCounter, 1, "outer called once");
 		QUnit.start();
 	});
+});
+
+QUnit.test("MutationObserver mounts each element once in browsers that do not support customElements", function () {
+	var doc = globals.getKeyValue("document");
+	var oldCE = globals.getKeyValue("customElements");
+	globals.setKeyValue("customElements", null);
+
+	var fixture = doc.getElementById('qunit-fixture');
+	var innerElCounter = 0, outerElCounter = 0;
+
+	callbacks.tag("inner-el", function(el) {});
+	callbacks.tag("outer-el", function(el) {
+		var inner = doc.createElement("inner-el");
+		el.appendChild(inner);
+	});
+
+	var origTagHandler = callbacks.tagHandler;
+	callbacks.tagHandler = function(el, tagName) {
+		if (tagName === "inner-el") {
+			innerElCounter++;
+		} else if (tagName === "outer-el") {
+			outerElCounter++;
+		}
+		origTagHandler.apply(this, arguments);
+	};
+
+	QUnit.stop();
+	afterMutation(function() {
+		QUnit.equal(innerElCounter, 1, "inner called once");
+		QUnit.equal(outerElCounter, 1, "outer called once");
+		globals.setKeyValue("customElements", function(){
+			return oldCE;
+		});
+		callbacks.tagHandler = origTagHandler;
+		QUnit.start();
+	});
+
+	var outer = doc.createElement("outer-el");
+	fixture.appendChild(outer);
 });

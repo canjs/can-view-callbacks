@@ -50,11 +50,17 @@ var mountElement = function (node) {
 var mutationObserverEnabled = false;
 var disableMutationObserver;
 var enableMutationObserver = function() {
+	var docEl = getDocument().documentElement;
+
 	if (mutationObserverEnabled) {
-		return;
+		if (mutationObserverEnabled === docEl) {
+			return;
+		}
+		// if the document has changed, re-enable mutationObserver
+		disableMutationObserver();
 	}
 
-	var undoOnInsertionHandler = domMutate.onInsertion(getDocument().documentElement, function(mutation) {
+	var undoOnInsertionHandler = domMutate.onInsertion(docEl, function(mutation) {
 		mountElement(mutation.target);
 	});
 	mutationObserverEnabled = true;
@@ -202,7 +208,6 @@ var tag = function (tagName, tagHandler) {
 			}
 		} else if(mutationObserverEnabled) {
 			disableMutationObserver();
-			disableMutationObserver = null;
 		}
 	} else {
 		var cb;
