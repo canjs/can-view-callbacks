@@ -4,7 +4,8 @@ var ObservationRecorder = require('can-observation-recorder');
 var dev = require('can-log/dev/dev');
 var getGlobal = require('can-globals/global/global');
 var getDocument = require('can-globals/document/document');
-var domMutate = require('can-dom-mutate/node');
+var domMutate = require('can-dom-mutate');
+var domMutateNode = require('can-dom-mutate/node');
 var namespace = require('can-namespace');
 var nodeLists = require('can-view-nodelist');
 var makeFrag = require("can-fragment");
@@ -46,49 +47,22 @@ var mountElement = function (node) {
 	}
 };
 
-var renderNodeAndChildren = function(node) {
-	var children;
-	mountElement(node);
-
-	if (node.getElementsByTagName) {
-		children = node.getElementsByTagName("*");
-		for (var k=0, child; (child = children[k]) !== undefined; k++) {
-			renderNodeAndChildren(child);
-		}
-	}
-};
-
 var mutationObserverEnabled = false;
-var globalMutationObserver;
+var disableMutationObserver;
 var enableMutationObserver = function() {
 	if (mutationObserverEnabled) {
 		return;
 	}
 
-	var mutationHandler = function(mutationsList) {
-		var addedNodes;
+	var undoOnInsertionHandler = domMutate.onInsertion(getDocument().documentElement, function(mutation) {
+		mountElement(mutation.target);
+	});
+	mutationObserverEnabled = true;
 
-		for (var i=0, mutation; (mutation = mutationsList[i]) !== undefined; i++) {
-			if (mutation.type === "childList") {
-				addedNodes = mutation.addedNodes;
-
-				for (var j=0, addedNode; (addedNode = addedNodes[j]) !== undefined; j++) {
-					renderNodeAndChildren(addedNode);
-				}
-			}
-		}
+	disableMutationObserver = function() {
+		undoOnInsertionHandler();
+		mutationObserverEnabled = false;
 	};
-
-	var MutationObserver = globals.getKeyValue("MutationObserver");
-	if(MutationObserver) {
-		globalMutationObserver = new MutationObserver(mutationHandler);
-		globalMutationObserver.observe(getDocument().documentElement, {
-			childList: true,
-			subtree: true
-		});
-
-		mutationObserverEnabled = true;
-	}
 };
 
 var renderTagsInDocument = function(tagName) {
@@ -227,7 +201,8 @@ var tag = function (tagName, tagHandler) {
 				renderTagsInDocument(tagName);
 			}
 		} else if(mutationObserverEnabled) {
-			globalMutationObserver.disconnect();
+			disableMutationObserver();
+			disableMutationObserver = null;
 		}
 	} else {
 		var cb;
@@ -304,7 +279,7 @@ var callbacks = {
 
 			var result = tagData.subtemplate(scope, tagData.options, nodeList);
 			var frag = typeof result === "string" ? makeFrag(result) : result;
-			domMutate.appendChild.call(el, frag);
+			domMutateNode.appendChild.call(el, frag);
 		}
 	}
 };
