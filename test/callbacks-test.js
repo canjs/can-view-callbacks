@@ -22,19 +22,19 @@ function afterMutation(cb) {
 
 QUnit.module('can-view-callbacks');
 
-QUnit.test('Initialized the plugin', function(){
+QUnit.test('Initialized the plugin', function(assert) {
   var handler = function(){
 
   };
   callbacks.attr(/something-\w+/, handler);
-  equal(callbacks.attr("something-else"), handler);
+  assert.equal(callbacks.attr("something-else"), handler);
 });
 
-QUnit.test("Placed as view.callbacks on the can namespace", function(){
-	equal(callbacks, can.view.callbacks, "Namespace value as can.view.callbacks");
+QUnit.test("Placed as view.callbacks on the can namespace", function(assert) {
+	assert.equal(callbacks, can.view.callbacks, "Namespace value as can.view.callbacks");
 });
 
-testHelpers.devOnlyTest("Show warning if in tag name a hyphen is missed, but still create handler", function () {
+testHelpers.devOnlyTest("Show warning if in tag name a hyphen is missed, but still create handler", function (assert) {
 	var tagName = "foobar";
 	var teardown = testHelpers.willWarn("Custom tag: " + tagName.toLowerCase() + " hyphen missed");
 
@@ -47,31 +47,31 @@ testHelpers.devOnlyTest("Show warning if in tag name a hyphen is missed, but sti
 		el.appendChild(textNode);
 	});
 
-	equal(teardown(), 1, "got warning");
+	assert.equal(teardown(), 1, "got warning");
 
 	var el = document.createElement(tagName);
 	callbacks.tagHandler(el, tagName, {});
 
-	QUnit.stop();
+	var done = assert.async();
 	afterMutation(function() {
-		QUnit.start();
-		QUnit.equal(el.innerHTML, "This is the " + tagName + " tag");
+		done();
+		assert.equal(el.innerHTML, "This is the " + tagName + " tag");
 	});
 });
 
-QUnit.test("remove a tag by passing null as second argument", function() {
+QUnit.test("remove a tag by passing null as second argument", function(assert) {
 	var tagName = "my-tag";
 	var handler = function() {
 		console.log('this is the handler');
 	};
 	callbacks.tag(tagName, handler);
 
-	equal(callbacks.tag(tagName), handler, 'passing no second argument should get handler');
-	notEqual(callbacks.tag(tagName, null), handler, 'passing null as second argument should remove handler');
+	assert.equal(callbacks.tag(tagName), handler, 'passing no second argument should get handler');
+	assert.notEqual(callbacks.tag(tagName, null), handler, 'passing null as second argument should remove handler');
 });
 
-QUnit.test('should throw if can-namespace.view.callbacks is already defined', function() {
-	stop();
+QUnit.test('should throw if can-namespace.view.callbacks is already defined', function(assert) {
+	var done = assert.async();
 	clone({
 		'can-namespace': {
 			default: {
@@ -84,18 +84,18 @@ QUnit.test('should throw if can-namespace.view.callbacks is already defined', fu
 	})
 	.import('can-view-callbacks')
 	.then(function() {
-		ok(false, 'should throw');
-		start();
+		assert.ok(false, 'should throw');
+		done();
 	})
 	.catch(function(err) {
 		var errMsg = err && err.message || err;
-		ok(errMsg.indexOf('can-view-callbacks') >= 0, 'should throw an error about can-view-callbacks');
-		start();
+		assert.ok(errMsg.indexOf('can-view-callbacks') >= 0, 'should throw an error about can-view-callbacks');
+		done();
 	});
 });
 
 
-testHelpers.devOnlyTest("should warn if attr callback defined after attr requested (#57)", function () {
+testHelpers.devOnlyTest("should warn if attr callback defined after attr requested (#57)", function (assert) {
 	var attrName = "masonry-wall";
 	var teardown = testHelpers.willWarn("can-view-callbacks: " + attrName+ " custom attribute behavior requested before it was defined.  Make sure "+attrName+" is defined before it is needed.");
 
@@ -105,10 +105,10 @@ testHelpers.devOnlyTest("should warn if attr callback defined after attr request
 	// callback attr provided
 	callbacks.attr(attrName, function(){});
 
-	equal(teardown(), 1, "got warning");
+	assert.equal(teardown(), 1, "got warning");
 });
 
-testHelpers.devOnlyTest("should warn if RegExp attr callback defined after attr requested (#57, #84)", function () {
+testHelpers.devOnlyTest("should warn if RegExp attr callback defined after attr requested (#57, #84)", function (assert) {
 	var attrName = "masonry-wall";
 	var attrMatch = /masonry[- ]?wall/;
 	var teardown = testHelpers.willWarn("can-view-callbacks: " + attrName+ " custom attribute behavior requested before it was defined.  Make sure "+attrName+" is defined before it is needed.");
@@ -119,39 +119,39 @@ testHelpers.devOnlyTest("should warn if RegExp attr callback defined after attr 
 	// callback attr provided
 	callbacks.attr(attrMatch, function() {});
 
-	equal(teardown(), 1, "got warning");
+	assert.equal(teardown(), 1, "got warning");
 });
 
-QUnit.test("tag method should return default callback when valid tag but not registered", function () {
-	equal(callbacks.tag('not-exist'), callbacks.defaultCallback, "used default noop function")
+QUnit.test("tag method should return default callback when valid tag but not registered", function(assert) {
+	assert.equal(callbacks.tag('not-exist'), callbacks.defaultCallback, "used default noop function")
 });
 
-QUnit.test("tag method should return undefined when invalid tag and not registered", function () {
-	notOk(callbacks.tag('notexist'), "used default noop function")
+QUnit.test("tag method should return undefined when invalid tag and not registered", function(assert) {
+	assert.notOk(callbacks.tag('notexist'), "used default noop function")
 });
 
-QUnit.test("should return callback (#60)", function(){
+QUnit.test("should return callback (#60)", function(assert) {
 	var handler = function() {};
 	callbacks.attr('foo', handler);
 
 	var fooHandler = callbacks.attr('foo');
-	equal(fooHandler, handler, 'registered handler returned');
+	assert.equal(fooHandler, handler, 'registered handler returned');
 });
 
 if(document.registerElement) {
-	testHelpers.devOnlyTest("should warn about missing custom elements (#56)", function(){
+	testHelpers.devOnlyTest("should warn about missing custom elements (#56)", function (assert){
 		var customElement = document.createElement('custom-element');
 		var restore = testHelpers.willWarn(/no custom element found for/i);
 		testTagHandler(customElement);
-		equal(restore(), 1);
+		assert.equal(restore(), 1);
 	});
 
-	testHelpers.devOnlyTest("should not warn about defined custom elements (#56)", function(){
+	testHelpers.devOnlyTest("should not warn about defined custom elements (#56)", function (assert){
 		document.registerElement('custom-element', {});
 		var customElement = document.createElement('custom-element');
 		var restore = testHelpers.willWarn(/no custom element found for/i);
 		testTagHandler(customElement);
-		equal(restore(), 0);
+		assert.equal(restore(), 0);
 	});
 }
 
@@ -161,16 +161,16 @@ function testTagHandler(customElement){
 	});
 }
 
-QUnit.test("can read tags from templateContext.tags", function() {
+QUnit.test("can read tags from templateContext.tags", function(assert) {
 	var globalHandler = function() {
-		QUnit.ok(false, 'global handler should not be called');
+		assert.ok(false, 'global handler should not be called');
 		return 'global data';
 	};
 	callbacks.tag('foo', globalHandler);
 
 	var scope = new Scope({});
 	var localHandler = function() {
-		QUnit.ok(true, 'local handler called');
+		assert.ok(true, 'local handler called');
 		return 'local data';
 	};
 	scope.templateContext.tags.set('foo', localHandler);
@@ -181,7 +181,7 @@ QUnit.test("can read tags from templateContext.tags", function() {
 	});
 });
 
-QUnit.test("Passes through nodeList", function(){
+QUnit.test("Passes through nodeList", function(assert) {
 	QUnit.expect(2);
 
 	var nodeList = nodeLists.register([], null, true, false);
@@ -196,14 +196,14 @@ QUnit.test("Passes through nodeList", function(){
 		scope: scope,
 		parentNodeList: nodeList,
 		subtemplate: function(scope, helpers, localNodeList){
-			QUnit.ok(localNodeList, "nodeList was provided");
-			QUnit.equal(localNodeList.parentList, nodeList, "it is our provided nodeList");
+			assert.ok(localNodeList, "nodeList was provided");
+			assert.equal(localNodeList.parentList, nodeList, "it is our provided nodeList");
 			return "<div></div>";
 		}
 	});
 });
 
-QUnit.test("tag handler is called automatically when elements are inserted into the page", function() {
+QUnit.test("tag handler is called automatically when elements are inserted into the page", function(assert) {
 	var fixture = document.getElementById('qunit-fixture');
 
 	callbacks.tag("the-el", function(el) {
@@ -226,18 +226,18 @@ QUnit.test("tag handler is called automatically when elements are inserted into 
 	fixture.appendChild(elOne);
 	fixture.appendChild(div);
 
-	QUnit.stop();
+	var done = assert.async();
 	afterMutation(function() {
-		QUnit.start();
+		done();
 		var els = fixture.getElementsByTagName("the-el");
 
 		for (var i=0; i<els.length; i++) {
-			QUnit.equal(els[i].innerHTML, "This is the el", "<the-el>[" + i + "] rendered correctly");
+			assert.equal(els[i].innerHTML, "This is the el", "<the-el>[" + i + "] rendered correctly");
 		}
 	});
 });
 
-QUnit.test("tag handler is not called again when elements are inserted into the page if it has been called already", function() {
+QUnit.test("tag handler is not called again when elements are inserted into the page if it has been called already", function(assert) {
 	var fixture = document.getElementById('qunit-fixture');
 
 	callbacks.tag("another-el", function(el) {
@@ -265,18 +265,18 @@ QUnit.test("tag handler is not called again when elements are inserted into the 
 	fixture.appendChild(elOne);
 	fixture.appendChild(div);
 
-	QUnit.stop();
+	var done = assert.async();
 	afterMutation(function() {
-		QUnit.start();
+		done();
 		var els = fixture.getElementsByTagName("another-el");
 
 		for (var i=0; i<els.length; i++) {
-			QUnit.equal(els[i].innerHTML, "This is another el", "<another-el>[" + i + "] not rendered");
+			assert.equal(els[i].innerHTML, "This is another el", "<another-el>[" + i + "] not rendered");
 		}
 	});
 });
 
-QUnit.test("when tagHandler is registered, it is called automatically for elements already in the page", function() {
+QUnit.test("when tagHandler is registered, it is called automatically for elements already in the page", function(assert) {
 	var fixture = document.getElementById('qunit-fixture');
 
 	// <existing-el />
@@ -299,18 +299,18 @@ QUnit.test("when tagHandler is registered, it is called automatically for elemen
 		el.innerHTML = "This is an existing el";
 	});
 
-	QUnit.stop();
+	var done = assert.async();
 	afterMutation(function() {
-		QUnit.start();
+		done();
 		var els = fixture.getElementsByTagName("existing-el");
 
 		for (var i=0; i<els.length; i++) {
-			QUnit.equal(els[i].innerHTML, "This is an existing el", "<existing-el>[" + i + "] rendered correctly");
+			assert.equal(els[i].innerHTML, "This is an existing el", "<existing-el>[" + i + "] rendered correctly");
 		}
 	});
 });
 
-QUnit.test("creating a tag for `content` should work", function() {
+QUnit.test("creating a tag for `content` should work", function(assert) {
 	var fixture = document.getElementById('qunit-fixture');
 
 	callbacks.tag("content", function(el) {
@@ -318,30 +318,30 @@ QUnit.test("creating a tag for `content` should work", function() {
 		el.appendChild(textNode);
 	});
 
-	ok(true, "did not throw error");
+	assert.ok(true, "did not throw error");
 
 	var contentEl = document.createElement("content");
 	callbacks.tagHandler(contentEl, "content", {});
 
-	QUnit.stop();
+	var done = assert.async();
 	afterMutation(function() {
-		QUnit.start();
-		QUnit.equal(contentEl.innerHTML, "This is the content");
+		done();
+		assert.equal(contentEl.innerHTML, "This is the content");
 	});
 });
 
-QUnit.test("registering the same tag twice should work", function() {
+QUnit.test("registering the same tag twice should work", function(assert) {
 	var fixture = document.getElementById('qunit-fixture');
 
 	callbacks.tag("the-tag", function() {});
 
 	callbacks.tag("the-tag", function(el, tagData) {
-		QUnit.equal(typeof tagData, "object", "tagHandler is passed a tagData object");
+		assert.equal(typeof tagData, "object", "tagHandler is passed a tagData object");
 		var textNode = document.createTextNode("This is the the-tag");
 		el.appendChild(textNode);
 	});
 
-	ok(true, "did not throw error");
+	assert.ok(true, "did not throw error");
 
 	var theManuallyHandledTag = document.createElement("the-tag");
 	callbacks.tagHandler(theManuallyHandledTag, "the-tag", {});
@@ -349,15 +349,15 @@ QUnit.test("registering the same tag twice should work", function() {
 	var theAutomaticallyHandledTag = document.createElement("the-tag");
 	fixture.appendChild(theAutomaticallyHandledTag);
 
-	QUnit.stop();
+	var done = assert.async();
 	afterMutation(function() {
-		QUnit.start();
-		QUnit.equal(theManuallyHandledTag.innerHTML, "This is the the-tag");
-		QUnit.equal(theAutomaticallyHandledTag.innerHTML, "This is the the-tag");
+		done();
+		assert.equal(theManuallyHandledTag.innerHTML, "This is the the-tag");
+		assert.equal(theAutomaticallyHandledTag.innerHTML, "This is the the-tag");
 	});
 });
 
-QUnit.test("registering, deleting, registering again should work", function() {
+QUnit.test("registering, deleting, registering again should work", function(assert) {
 	var fixture = document.getElementById('qunit-fixture');
 
 	callbacks.tag("the-same-tag", function() {});
@@ -366,12 +366,12 @@ QUnit.test("registering, deleting, registering again should work", function() {
 	callbacks.tag("the-same-tag", null);
 
 	callbacks.tag("the-same-tag", function(el, tagData) {
-		QUnit.equal(typeof tagData, "object", "tagHandler is passed a tagData object");
+		assert.equal(typeof tagData, "object", "tagHandler is passed a tagData object");
 		var textNode = document.createTextNode("This is the the-same-tag");
 		el.appendChild(textNode);
 	});
 
-	ok(true, "did not throw error");
+	assert.ok(true, "did not throw error");
 
 	var theManuallyHandledTag = document.createElement("the-same-tag");
 	callbacks.tagHandler(theManuallyHandledTag, "the-same-tag", {});
@@ -379,15 +379,15 @@ QUnit.test("registering, deleting, registering again should work", function() {
 	var theAutomaticallyHandledTag = document.createElement("the-same-tag");
 	fixture.appendChild(theAutomaticallyHandledTag);
 
-	QUnit.stop();
+	var done = assert.async();
 	afterMutation(function() {
-		QUnit.start();
-		QUnit.equal(theManuallyHandledTag.innerHTML, "This is the the-same-tag");
-		QUnit.equal(theAutomaticallyHandledTag.innerHTML, "This is the the-same-tag");
+		done();
+		assert.equal(theManuallyHandledTag.innerHTML, "This is the the-same-tag");
+		assert.equal(theAutomaticallyHandledTag.innerHTML, "This is the the-same-tag");
 	});
 });
 
-QUnit.test("Works in environments without MutationObserver", function() {
+QUnit.test("Works in environments without MutationObserver", function(assert) {
 	var oldMO = globals.getKeyValue("MutationObserver");
 	var oldCE = globals.getKeyValue("customElements");
 	globals.setKeyValue("MutationObserver", null);
@@ -398,10 +398,10 @@ QUnit.test("Works in environments without MutationObserver", function() {
 	fixture.appendChild(autoHandled);
 
 	callbacks.tag("no-mutation-observer", function() {
-		QUnit.ok(true, "tag was called");
+		assert.ok(true, "tag was called");
 	});
 
-	QUnit.stop();
+	var done = assert.async();
 	afterMutation(function(){
 		globals.setKeyValue("MutationObserver", function(){
 			return oldMO;
@@ -409,33 +409,33 @@ QUnit.test("Works in environments without MutationObserver", function() {
 		globals.setKeyValue("customElements", function(){
 			return oldCE;
 		});
-		QUnit.start();
+		done();
 	});
 });
 
-QUnit.test("automounting doesn't happen if the data-can-automount flag is set to false", function() {
+QUnit.test("automounting doesn't happen if the data-can-automount flag is set to false", function(assert) {
 	var fixture = document.getElementById('qunit-fixture');
 	document.documentElement.dataset.canAutomount = "false";
 
 	callbacks.tag("automount-false", function(el) {
 		var textNode = document.createTextNode("This is the automount-false");
 		el.appendChild(textNode);
-		ok(false, "this shouldn't have been mounted :(");
+		assert.ok(false, "this shouldn't have been mounted :(");
 	});
 
 	var theAutomaticallyHandledTag = document.createElement("automount-false");
 	fixture.appendChild(theAutomaticallyHandledTag);
 
-	QUnit.stop();
+	var done = assert.async();
 	afterMutation(function() {
-		QUnit.equal(theAutomaticallyHandledTag.innerHTML, "");
+		assert.equal(theAutomaticallyHandledTag.innerHTML, "");
 		delete document.documentElement.dataset.canAutomount;
 		fixture.innerHTML = "";
-		QUnit.start();
+		done();
 	});
 });
 
-QUnit.test("attrs takes a Map of attr callbacks", function(){
+QUnit.test("attrs takes a Map of attr callbacks", function(assert) {
 	var doc = globals.getKeyValue('document');
 	var map = new Map();
 	map.set("foo", function(el, attrData) {
@@ -456,11 +456,11 @@ QUnit.test("attrs takes a Map of attr callbacks", function(){
 	callbacks.attr("foo")(el1);
 	callbacks.attr("bar")(el2);
 
-	QUnit.equal(el1.firstChild.nodeValue, "foo");
-	QUnit.equal(el2.firstChild.nodeValue, "bar");
+	assert.equal(el1.firstChild.nodeValue, "foo");
+	assert.equal(el2.firstChild.nodeValue, "bar");
 });
 
-QUnit.test("attrs will use can.callbackMap symbol if available.", function(){
+QUnit.test("attrs will use can.callbackMap symbol if available.", function(assert) {
 	var doc = globals.getKeyValue('document');
 	var map = new Map();
 	map.set("foo2", function(el, attrData) {
@@ -486,11 +486,11 @@ QUnit.test("attrs will use can.callbackMap symbol if available.", function(){
 	callbacks.attr("foo2")(el1);
 	callbacks.attr("bar2")(el2);
 
-	QUnit.equal(el1.firstChild.nodeValue, "foo");
-	QUnit.equal(el2.firstChild.nodeValue, "bar");
+	assert.equal(el1.firstChild.nodeValue, "foo");
+	assert.equal(el2.firstChild.nodeValue, "bar");
 });
 
-QUnit.test("Prevent throwing when there is no documentElement in tag() #100", function() {
+QUnit.test("Prevent throwing when there is no documentElement in tag() #100", function(assert) {
 	var realDoc = globals.getKeyValue("document");
 	var newDoc = realDoc.implementation.createHTMLDocument('test');
 	globals.setKeyValue("document", newDoc);
@@ -500,16 +500,16 @@ QUnit.test("Prevent throwing when there is no documentElement in tag() #100", fu
 
 	try {
 		callbacks.tag("please-dont-blow-up", function(){});
-		QUnit.ok(true, "it worked");
+		assert.ok(true, "it worked");
 	} catch(err) {
-		QUnit.ok(false, err);
+		assert.ok(false, err);
 	} finally {
 		globals.setKeyValue("document", realDoc);
 	}
 
 });
 
-QUnit.test("Renders to the correct document", function() {
+QUnit.test("Renders to the correct document", function(assert) {
 	var realGlobal = globals.getKeyValue("global");
 	var newGlobal = {};
 	globals.setKeyValue("global", newGlobal);
@@ -526,14 +526,14 @@ QUnit.test("Renders to the correct document", function() {
 		});
 	} catch(e) {}
 	finally {
-		QUnit.equal(newDoc.body.firstChild.firstChild.nodeValue, "works", "Updated the correct document");
+		assert.equal(newDoc.body.firstChild.firstChild.nodeValue, "works", "Updated the correct document");
 
 		globals.setKeyValue("global", realGlobal);
 		globals.setKeyValue("document", realGlobal.document);
 	}
 });
 
-QUnit.test("Edge prevent double insert", function () {
+QUnit.test("Edge prevent double insert", function(assert) {
 	var fixture = document.getElementById('qunit-fixture');
 	var innerElCounter = 0, outerElCounter = 0;
 
@@ -549,15 +549,15 @@ QUnit.test("Edge prevent double insert", function () {
 		callbacks.tagHandler(el.firstChild, "edge-double-insert-inner", {});
 	});
 
-	QUnit.stop();
+	var done = assert.async();
 	afterMutation(function() {
-		QUnit.equal(innerElCounter, 1, "inner called once");
-		QUnit.equal(outerElCounter, 1, "outer called once");
-		QUnit.start();
+		assert.equal(innerElCounter, 1, "inner called once");
+		assert.equal(outerElCounter, 1, "outer called once");
+		done();
 	});
 });
 
-QUnit.test("MutationObserver mounts each element once in browsers that do not support customElements", function () {
+QUnit.test("MutationObserver mounts each element once in browsers that do not support customElements", function(assert) {
 	var doc = globals.getKeyValue("document");
 	var oldCE = globals.getKeyValue("customElements");
 	globals.setKeyValue("customElements", null);
@@ -581,15 +581,15 @@ QUnit.test("MutationObserver mounts each element once in browsers that do not su
 		origTagHandler.apply(this, arguments);
 	};
 
-	QUnit.stop();
+	var done = assert.async();
 	afterMutation(function() {
-		QUnit.equal(innerElCounter, 1, "inner called once");
-		QUnit.equal(outerElCounter, 1, "outer called once");
+		assert.equal(innerElCounter, 1, "inner called once");
+		assert.equal(outerElCounter, 1, "outer called once");
 		globals.setKeyValue("customElements", function(){
 			return oldCE;
 		});
 		callbacks.tagHandler = origTagHandler;
-		QUnit.start();
+		done();
 	});
 
 	var outer = doc.createElement("mount-once-outer");
