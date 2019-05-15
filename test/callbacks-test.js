@@ -182,7 +182,7 @@ QUnit.test("can read tags from templateContext.tags", function(assert) {
 });
 
 QUnit.test("Passes through nodeList", function(assert) {
-	QUnit.expect(2);
+	assert.expect(2);
 
 	var nodeList = nodeLists.register([], null, true, false);
 
