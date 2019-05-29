@@ -10,6 +10,8 @@ var domMutate = require('can-dom-mutate');
 var domMutateNode = require('can-dom-mutate/node');
 var globals = require('can-globals');
 
+var supportsCustomElements = 'customElements' in window;
+
 function afterMutation(cb) {
 	var doc = globals.getKeyValue('document');
 	var div = doc.createElement("div");
@@ -595,3 +597,21 @@ QUnit.test("MutationObserver mounts each element once in browsers that do not su
 	var outer = doc.createElement("mount-once-outer");
 	fixture.appendChild(outer);
 });
+
+if (supportsCustomElements) {
+	QUnit.test("calls initializeViewModel Symbol on custom element", function(assert) {
+		var tagName = "initialize-viewmodel-el";
+		var tagData = {};
+		var el;
+
+		function El() {}
+		El.prototype[canSymbol.for("can.initializeViewModel")] = function(elBeingInitialized, tagDataPassedToInitialize) {
+			assert.equal(elBeingInitialized, el, "el is passed correctly");
+			assert.equal(tagDataPassedToInitialize, tagData, "tagData is passed correctly");
+		};
+		customElements.define(tagName, El);
+
+		el = new El();
+		callbacks.tagHandler(el, tagName, tagData);
+	});
+}

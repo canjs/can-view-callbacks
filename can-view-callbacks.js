@@ -14,6 +14,7 @@ var canSymbol = require('can-symbol');
 var canReflect = require('can-reflect');
 
 var callbackMapSymbol = canSymbol.for('can.callbackMap');
+var initializeViewModelSymbol = canSymbol.for('can.initializeViewModel');
 
 //!steal-remove-start
 if (process.env.NODE_ENV !== 'production') {
@@ -245,7 +246,7 @@ var callbacks = {
 
 		var scope = tagData.scope,
 			helperTagCallback = scope && scope.templateContext.tags.get(tagName),
-			tagCallback = helperTagCallback || tags[tagName],
+			tagCallback = helperTagCallback || tags[tagName] || el[initializeViewModelSymbol],
 			res;
 
 		// If this was an element like <foo-bar> that doesn't have a component, just render its content
