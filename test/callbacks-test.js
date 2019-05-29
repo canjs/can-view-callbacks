@@ -599,13 +599,13 @@ QUnit.test("MutationObserver mounts each element once in browsers that do not su
 });
 
 if (supportsCustomElements) {
-	QUnit.test("calls initializeViewModel Symbol on custom element", function(assert) {
+	QUnit.test("calls can.initialize Symbol on custom element", function(assert) {
 		var tagName = "initialize-viewmodel-el";
 		var tagData = {};
 		var el;
 
 		function El() {}
-		El.prototype[canSymbol.for("can.initializeViewModel")] = function(elBeingInitialized, tagDataPassedToInitialize) {
+		El.prototype[canSymbol.for("can.initialize")] = function(elBeingInitialized, tagDataPassedToInitialize) {
 			assert.equal(elBeingInitialized, el, "el is passed correctly");
 			assert.equal(tagDataPassedToInitialize, tagData, "tagData is passed correctly");
 		};
