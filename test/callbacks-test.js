@@ -1,6 +1,5 @@
 var QUnit = require('steal-qunit');
 var callbacks = require('can-view-callbacks');
-var nodeLists = require('can-view-nodelist');
 var can = require('can-namespace');
 var canSymbol = require('can-symbol');
 var clone = require('steal-clone');
@@ -15,7 +14,7 @@ var supportsCustomElements = 'customElements' in window;
 function afterMutation(cb) {
 	var doc = globals.getKeyValue('document');
 	var div = doc.createElement("div");
-	domMutate.onNodeInsertion(div, function(){
+	domMutate.onNodeConnected(div, function(){
 		doc.body.removeChild(div);
 		setTimeout(cb, 5);
 	});
@@ -180,28 +179,6 @@ QUnit.test("can read tags from templateContext.tags", function(assert) {
 	var el = document.createElement('div');
 	var fooHandler = callbacks.tagHandler(el, 'foo', {
 		scope: scope
-	});
-});
-
-QUnit.test("Passes through nodeList", function(assert) {
-	assert.expect(2);
-
-	var nodeList = nodeLists.register([], null, true, false);
-
-	var scope = new Scope({});
-
-	callbacks.tag("nodelist-tag", function(){
-		return {};
-	});
-	var el = document.createElement("div");
-	callbacks.tagHandler(el, "nodelist-tag", {
-		scope: scope,
-		parentNodeList: nodeList,
-		subtemplate: function(scope, helpers, localNodeList){
-			assert.ok(localNodeList, "nodeList was provided");
-			assert.equal(localNodeList.parentList, nodeList, "it is our provided nodeList");
-			return "<div></div>";
-		}
 	});
 });
 
