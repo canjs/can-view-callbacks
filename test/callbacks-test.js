@@ -14,7 +14,8 @@ var supportsCustomElements = 'customElements' in window;
 function afterMutation(cb) {
 	var doc = globals.getKeyValue('document');
 	var div = doc.createElement("div");
-	domMutate.onNodeConnected(div, function(){
+	var teardown = domMutate.onNodeConnected(div, function(){
+		teardown();
 		doc.body.removeChild(div);
 		setTimeout(cb, 5);
 	});
