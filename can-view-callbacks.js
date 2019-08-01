@@ -152,8 +152,6 @@ var defaultCallback = function () {};
 
 var tag = function (tagName, tagHandler) {
 	if(tagHandler) {
-		var GLOBAL = getGlobal();
-
 		var validCustomElementName = automaticCustomElementCharacters.test(tagName),
 			tagExists = typeof tags[tagName.toLowerCase()] !== 'undefined',
 			customElementExists;
