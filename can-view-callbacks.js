@@ -170,12 +170,6 @@ var tag = function (tagName, tagHandler) {
 		}
 		//!steal-remove-end
 
-		// if we have html5shiv ... re-generate
-		if (GLOBAL.html5) {
-			GLOBAL.html5.elements += " " + tagName;
-			GLOBAL.html5.shivDocument();
-		}
-
 		tags[tagName.toLowerCase()] = tagHandler;
 
 		if(automountEnabled()) {
