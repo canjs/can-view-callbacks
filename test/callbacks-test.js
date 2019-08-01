@@ -567,21 +567,14 @@ QUnit.test("MutationObserver mounts each element once in browsers that do not su
 	var fixture = doc.getElementById('qunit-fixture');
 	var innerElCounter = 0, outerElCounter = 0;
 
-	callbacks.tag("mount-once-inner", function(el) {});
+	callbacks.tag("mount-once-inner", function(el) {
+		innerElCounter++;
+	});
 	callbacks.tag("mount-once-outer", function(el) {
+		outerElCounter++;
 		var inner = doc.createElement("mount-once-inner");
 		el.appendChild(inner);
 	});
-
-	var origTagHandler = callbacks.tagHandler;
-	callbacks.tagHandler = function(el, tagName) {
-		if (tagName === "mount-once-inner") {
-			innerElCounter++;
-		} else if (tagName === "mount-once-outer") {
-			outerElCounter++;
-		}
-		origTagHandler.apply(this, arguments);
-	};
 
 	var done = assert.async();
 	afterMutation(function() {
@@ -590,7 +583,6 @@ QUnit.test("MutationObserver mounts each element once in browsers that do not su
 		globals.setKeyValue("customElements", function(){
 			return oldCE;
 		});
-		callbacks.tagHandler = origTagHandler;
 		done();
 	});
 
