@@ -183,6 +183,7 @@ var tag = function (tagName, tagHandler) {
 					};
 
 					CustomElement.prototype = Object.create(HTMLElement.prototype);
+					CustomElement.prototype.constructor = CustomElement;
 
 					CustomElement.prototype.connectedCallback = function() {
 						callbacks.tagHandler(this, tagName.toLowerCase(), {});
