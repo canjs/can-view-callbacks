@@ -7,7 +7,6 @@ var getDocument = require('can-globals/document/document');
 var domMutate = require('can-dom-mutate');
 var domMutateNode = require('can-dom-mutate/node');
 var namespace = require('can-namespace');
-var nodeLists = require('can-view-nodelist');
 var makeFrag = require("can-fragment");
 var globals = require('can-globals');
 var canSymbol = require('can-symbol');
@@ -61,7 +60,7 @@ var enableMutationObserver = function() {
 		disableMutationObserver();
 	}
 
-	var undoOnInsertionHandler = domMutate.onInsertion(docEl, function(mutation) {
+	var undoOnInsertionHandler = domMutate.onConnected(docEl, function(mutation) {
 		mountElement(mutation.target);
 	});
 	mutationObserverEnabled = true;
@@ -184,6 +183,7 @@ var tag = function (tagName, tagHandler) {
 					};
 
 					CustomElement.prototype = Object.create(HTMLElement.prototype);
+					CustomElement.prototype.constructor = CustomElement;
 
 					CustomElement.prototype.connectedCallback = function() {
 						callbacks.tagHandler(this, tagName.toLowerCase(), {});
@@ -272,10 +272,10 @@ var callbacks = {
 				scope = scope.add(res);
 			}
 
-			var nodeList = nodeLists.register([], undefined, tagData.parentNodeList || true, false);
-			nodeList.expression = "<" + el.tagName + ">";
+			//var nodeList = nodeLists.register([], undefined, tagData.parentNodeList || true, false);
+			//nodeList.expression = "<" + el.tagName + ">";
 
-			var result = tagData.subtemplate(scope, tagData.options, nodeList);
+			var result = tagData.subtemplate(scope, tagData.options);
 			var frag = typeof result === "string" ? makeFrag(result) : result;
 			domMutateNode.appendChild.call(el, frag);
 		}
