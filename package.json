@@ -32,7 +32,7 @@
     "donejs"
   ],
   "dependencies": {
-    "can-dom-mutate": "^2.0.0",
+    "can-dom-mutate": "^2.0.8",
     "can-fragment": "^1.0.0",
     "can-globals": "^1.0.0",
     "can-log": "^1.0.0",
