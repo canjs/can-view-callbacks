@@ -45,7 +45,7 @@
     "can-test-helpers": "^1.0.1",
     "can-view-scope": "^4.0.0",
     "detect-cyclic-packages": "^1.1.0",
-    "jshint": "^2.9.1",
+    "jshint": "^2.11.1",
     "steal": "^2.0.0",
     "steal-qunit": "^2.0.0",
     "testee": "^0.9.0"
